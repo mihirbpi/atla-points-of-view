@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Avatar — Points of View</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ambient element theming -------------------------------------------- -->
+<div class="ambient" aria-hidden="true">
+  <div class="ambient-wash"></div>
+  <div class="ambient-grain"></div>
+  <div class="corner corner-tl"><div class="sigil" data-corner="0"></div></div>
+  <div class="corner corner-tr"><div class="sigil" data-corner="1"></div></div>
+  <div class="corner corner-br"><div class="sigil" data-corner="2"></div></div>
+  <div class="corner corner-bl"><div class="sigil" data-corner="3"></div></div>
+  <div class="corner corner-mid"><div class="sigil" data-corner="4"></div></div>
+</div>
+
+<header class="masthead">
+  <div class="masthead-inner">
+    <div class="brand">
+      <span class="brand-mark" id="brandMark"></span>
+      <span class="brand-text">
+        <span class="brand-title">Avatar</span>
+        <span class="brand-sub">Points of View</span>
+      </span>
+    </div>
+    <p class="brand-note">The same story, sixty-one times over, told from wherever each of them was standing.</p>
+  </div>
+
+  <nav class="cast" id="cast" aria-label="Choose a character"></nav>
+</header>
+
+<main class="stage">
+
+  <!-- episode navigator ---------------------------------------------- -->
+  <aside class="rail" aria-label="Episodes">
+    <div class="book-tabs" id="bookTabs" role="tablist"></div>
+    <ol class="episodes" id="episodeList"></ol>
+  </aside>
+
+  <!-- reading panel --------------------------------------------------- -->
+  <section class="panel" id="panel" tabindex="-1">
+
+    <div class="panel-head">
+      <div class="ep-meta">
+        <span class="ep-book" id="epBook"></span>
+        <span class="ep-sep">·</span>
+        <span class="ep-num" id="epNum"></span>
+      </div>
+      <h1 class="ep-title" id="epTitle"></h1>
+      <p class="ep-logline" id="epLogline"></p>
+    </div>
+
+    <div class="who">
+      <div class="who-id">
+        <h2 class="who-name" id="whoName"></h2>
+        <p class="who-epithet" id="whoEpithet"></p>
+      </div>
+      <div class="bending" id="bending" aria-label="Bending at this point in the story"></div>
+    </div>
+
+    <p class="who-blurb" id="whoBlurb"></p>
+
+    <article class="pov" id="pov"></article>
+
+    <div class="milestones" id="milestones"></div>
+
+    <nav class="stepper">
+      <button class="step" id="prevBtn" type="button">
+        <span class="step-arrow">&#8592;</span>
+        <span class="step-label"><em>Previous</em><b id="prevTitle"></b></span>
+      </button>
+      <button class="step step-next" id="nextBtn" type="button">
+        <span class="step-label"><em>Next</em><b id="nextTitle"></b></span>
+        <span class="step-arrow">&#8594;</span>
+      </button>
+    </nav>
+
+    <p class="hint">Arrow keys move between episodes · <kbd>1</kbd>–<kbd>7</kbd> switch character</p>
+  </section>
+</main>
+
+<script src="data/characters.js"></script>
+<script src="data/episodes.js"></script>
+<script src="data/pov-book1-aang.js"></script>
+<script src="data/pov-book1-katara.js"></script>
+<script src="data/pov-book1-sokka.js"></script>
+<script src="data/pov-book1-zuko.js"></script>
+<script src="data/pov-book1-iroh.js"></script>
+<script src="data/pov-book1-toph-azula.js"></script>
+<script src="data/pov-book2-aang.js"></script>
+<script src="data/pov-book2-katara.js"></script>
+<script src="data/pov-book2-sokka.js"></script>
+<script src="data/pov-book2-toph.js"></script>
+<script src="data/pov-book2-zuko.js"></script>
+<script src="data/pov-book2-iroh.js"></script>
+<script src="data/pov-book2-azula.js"></script>
+<script src="data/pov-book3-aang.js"></script>
+<script src="data/pov-book3-katara.js"></script>
+<script src="data/pov-book3-sokka.js"></script>
+<script src="data/pov-book3-toph.js"></script>
+<script src="data/pov-book3-zuko.js"></script>
+<script src="data/pov-book3-iroh.js"></script>
+<script src="data/pov-book3-azula.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
