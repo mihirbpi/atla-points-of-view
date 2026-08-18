@@ -136,6 +136,48 @@ body {
   .sigil, .ambient-wash, body, .card { transition-duration: 1ms !important; }
 }
 
+/* ---- background portrait ----------------------------------------------- */
+
+.portrait {
+  position: fixed;
+  /* sized so the whole head clears the top edge of the reading panel
+     (~200px) rather than being cut in half by it */
+  top: 0;
+  left: 50%;
+  width: min(26vw, 250px);
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: .34;
+  /* stacked drop-shadows compound into a real dark halo, so the pale figure
+     reads against the bright corners of the warm themes (Aang, Iroh) as well
+     as against the dark ones */
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.9))
+          drop-shadow(0 0 1px rgba(0,0,0,.9))
+          drop-shadow(0 0 3px rgba(0,0,0,.8))
+          drop-shadow(0 10px 34px rgba(0,0,0,.6));
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 0%, #000 68%, transparent 96%);
+  mask-image: linear-gradient(to bottom,
+    #000 0%, #000 68%, transparent 96%);
+  transition: opacity 900ms var(--ease);
+}
+.portrait svg, .portrait img { width: 100%; height: auto; display: block; }
+.portrait img { filter: saturate(.8); }
+
+.portrait.swap-in { animation: portrait-in 900ms var(--ease); }
+@keyframes portrait-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(.97); }
+  to   { opacity: .34; transform: translateX(-50%); }
+}
+
+@media (max-width: 900px) {
+  .portrait { width: 40vw; opacity: .14; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portrait.swap-in { animation: none; }
+}
+
 /* ---- masthead ---------------------------------------------------------- */
 
 .masthead {
@@ -274,31 +316,56 @@ body {
 
 .book-tab {
   flex: 1;
-  padding: 9px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 5px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.13);
-  background: rgba(255,255,255,.04);
+  border: 1px solid color-mix(in srgb, var(--book) 40%, transparent);
+  background: color-mix(in srgb, var(--book) 12%, transparent);
   color: inherit;
   font: inherit;
   font-size: 12px;
   letter-spacing: .08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 220ms var(--ease);
+  transition: background 240ms var(--ease), border-color 240ms var(--ease),
+              box-shadow 240ms var(--ease), transform 240ms var(--ease);
 }
-.book-tab:hover:not(:disabled) { background: rgba(255,255,255,.1); }
+.book-tab:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--book) 26%, transparent);
+  transform: translateY(-1px);
+}
 .book-tab[aria-selected="true"] {
-  background: color-mix(in srgb, var(--core) 34%, rgba(255,255,255,.05));
-  border-color: color-mix(in srgb, var(--glow) 42%, transparent);
+  background: color-mix(in srgb, var(--book) 46%, transparent);
+  border-color: color-mix(in srgb, var(--book-glow) 62%, transparent);
+  box-shadow: 0 6px 22px -12px var(--book), 0 0 0 1px rgba(255,255,255,.06) inset;
 }
 .book-tab:disabled { opacity: .34; cursor: not-allowed; }
+.book-tab:focus-visible { outline: 2px solid var(--book-glow); outline-offset: 2px; }
+
+.book-sigil {
+  width: 17px; height: 17px;
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--book) 70%, transparent);
+}
+.book-sigil svg { width: 78%; height: 78%; }
+.book-text { display: flex; flex-direction: column; align-items: flex-start; }
 .book-tab b {
   display: block;
-  font-size: 11.5px;
-  letter-spacing: .05em;
+  font-size: 11px;
+  letter-spacing: .04em;
   white-space: nowrap;
 }
-.book-tab i { font-style: normal; font-size: 10px; opacity: .7; }
+.book-tab i {
+  font-style: normal;
+  font-size: 10px;
+  opacity: .85;
+  color: color-mix(in srgb, var(--book-glow) 80%, white);
+}
 
 .episodes {
   position: relative;
@@ -411,6 +478,79 @@ body {
   line-height: 1.6;
   opacity: .7;
   max-width: 62ch;
+}
+
+/* full episode synopsis — collapsed disclosure */
+
+.synopsis { margin-top: 20px; }
+.synopsis[hidden] { display: none; }
+
+.synopsis > summary {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 9px 16px 9px 12px;
+  border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--glow) 26%, transparent);
+  background: color-mix(in srgb, var(--core) 14%, transparent);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background 240ms var(--ease), border-color 240ms var(--ease);
+}
+.synopsis > summary::-webkit-details-marker { display: none; }
+.synopsis > summary:hover {
+  background: color-mix(in srgb, var(--core) 26%, transparent);
+  border-color: color-mix(in srgb, var(--glow) 46%, transparent);
+}
+.synopsis > summary:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+
+.synopsis-chev {
+  width: 0; height: 0;
+  flex: 0 0 auto;
+  border-left: 6px solid var(--glow);
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+  transition: transform 240ms var(--ease);
+}
+.synopsis[open] .synopsis-chev { transform: rotate(90deg); }
+
+.synopsis-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.synopsis-hint {
+  font-size: 12px;
+  opacity: .55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.synopsis-body {
+  font-family: var(--serif);
+  font-size: clamp(15.5px, 1.15vw, 17px);
+  line-height: 1.75;
+  max-width: 70ch;
+  margin: 18px 0 4px;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--glow) 30%, transparent);
+  animation: reveal 340ms var(--ease);
+}
+.synopsis-body p { margin: 0 0 16px; }
+.synopsis-body p:last-child { margin-bottom: 0; }
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 560px) {
+  .synopsis-hint { display: none; }
 }
 
 /* who + bending */
@@ -649,6 +789,8 @@ kbd {
   <div class="corner corner-mid"><div class="sigil" data-corner="4"></div></div>
 </div>
 
+<div class="portrait" id="portrait" aria-hidden="true"></div>
+
 <header class="masthead">
   <div class="masthead-inner">
     <div class="brand">
@@ -683,6 +825,15 @@ kbd {
       </div>
       <h1 class="ep-title" id="epTitle"></h1>
       <p class="ep-logline" id="epLogline"></p>
+
+      <details class="synopsis" id="synopsis">
+        <summary>
+          <span class="synopsis-chev" aria-hidden="true"></span>
+          <span class="synopsis-label">Read the full episode summary</span>
+          <span class="synopsis-hint">the whole plot, start to finish</span>
+        </summary>
+        <div class="synopsis-body" id="synopsisBody"></div>
+      </details>
     </div>
 
     <div class="who">
@@ -1020,6 +1171,147 @@ window.ATLA.ELEMENTS.metal = {
 </script>
 <script>
 /* =========================================================================
+   Character portraits.
+
+   These are ORIGINAL stylised drawings, not the show's artwork — head-and-
+   shoulders silhouettes built from each character's distinguishing features
+   (Aang's arrow, Katara's loopies, Sokka's wolf tail, Toph's bun, Zuko's
+   scar, Iroh's beard, Azula's crown), drawn in the same line-art register as
+   the element sigils so the page reads as one system.
+
+   Everything is drawn in `currentColor`; app.js tints it with the character's
+   glow colour. Shared geometry lives in the P object below.
+
+   TO USE YOUR OWN IMAGES INSTEAD: add `portraitSrc: 'img/aang.png'` to that
+   character in characters.js and it will be used instead of the drawing. A
+   transparent PNG or SVG, roughly 5:6 portrait, works best. Note that the
+   single-file build inlines everything, so an external image would need to be
+   a data: URL to survive the build.
+   ========================================================================= */
+
+window.ATLA = window.ATLA || {};
+
+(function () {
+  /* shared pieces — viewBox is 0 0 200 240 */
+  var P = {
+    head: '<path d="M100 44 C132 44 150 68 150 100 C150 134 128 158 100 158 ' +
+          'C72 158 50 134 50 100 C50 68 68 44 100 44 Z" ' +
+          'fill="currentColor" opacity=".34" stroke="currentColor" stroke-width="3"/>',
+    neck: '<path d="M86 146 h28 v22 h-28 Z" fill="currentColor" opacity=".3"/>',
+    bust: '<path d="M100 160 C60 160 34 196 30 240 L170 240 C166 196 140 160 100 160 Z" ' +
+          'fill="currentColor" opacity=".52"/>',
+    ears: '<ellipse cx="48" cy="104" rx="7" ry="12" fill="currentColor" opacity=".3"/>' +
+          '<ellipse cx="152" cy="104" rx="7" ry="12" fill="currentColor" opacity=".3"/>',
+    eyes: '<ellipse cx="80" cy="104" rx="9" ry="5" fill="currentColor" opacity=".8"/>' +
+          '<ellipse cx="120" cy="104" rx="9" ry="5" fill="currentColor" opacity=".8"/>',
+    /* blank, pupil-less — Toph */
+    eyesBlind: '<ellipse cx="80" cy="104" rx="9" ry="5" fill="none" stroke="currentColor" ' +
+               'stroke-width="2" opacity=".7"/>' +
+               '<ellipse cx="120" cy="104" rx="9" ry="5" fill="none" stroke="currentColor" ' +
+               'stroke-width="2" opacity=".7"/>',
+    /* sharp, angled down toward the nose — Azula, Zuko */
+    browsSharp: '<path d="M68 92 L92 97 L92 92 L68 87 Z" fill="currentColor" opacity=".75"/>' +
+                '<path d="M132 92 L108 97 L108 92 L132 87 Z" fill="currentColor" opacity=".75"/>',
+    browsSoft: '<path d="M70 90 q10 -5 20 -1 v4 q-10 -4 -20 1 Z" fill="currentColor" opacity=".6"/>' +
+               '<path d="M130 90 q-10 -5 -20 -1 v4 q10 -4 20 1 Z" fill="currentColor" opacity=".6"/>',
+    mouth: '<path d="M90 128 q10 5 20 0" fill="none" stroke="currentColor" ' +
+           'stroke-width="2.5" stroke-linecap="round" opacity=".55"/>'
+  };
+
+  window.ATLA.PORTRAITS = {
+
+    /* bald, arrow down the forehead, oversized ears, monk collar */
+    aang:
+      P.bust + P.neck + P.ears + P.head +
+      '<path d="M100 108 L84 74 L94 74 L94 44 L106 44 L106 74 L116 74 Z" ' +
+      'fill="currentColor" opacity=".85"/>' +
+      P.eyes + P.mouth +
+      '<path d="M74 168 L100 196 L126 168 L118 164 L100 182 L82 164 Z" ' +
+      'fill="currentColor" opacity=".5"/>',
+
+    /* hair down past the shoulders, two loopies framing the face, choker */
+    katara:
+      '<path d="M100 26 C146 26 166 60 162 106 C160 134 154 160 150 186 ' +
+      'C144 152 152 116 142 88 C128 100 72 100 58 88 C48 116 56 152 50 186 ' +
+      'C46 160 40 134 38 106 C34 60 54 26 100 26 Z" fill="currentColor" opacity=".5"/>' +
+      P.bust + P.neck + P.head + P.browsSoft + P.eyes + P.mouth +
+      '<path d="M62 84 C50 106 52 134 64 150 C58 128 60 104 70 90 Z" ' +
+      'fill="currentColor" opacity=".62"/>' +
+      '<path d="M138 84 C150 106 148 134 136 150 C142 128 140 104 130 90 Z" ' +
+      'fill="currentColor" opacity=".62"/>' +
+      '<path d="M64 62 C76 50 124 50 136 62 C122 74 78 74 64 62 Z" ' +
+      'fill="currentColor" opacity=".55"/>' +
+      '<rect x="82" y="170" width="36" height="8" rx="4" fill="currentColor" opacity=".7"/>',
+
+    /* shaved sides, hair gathered into a wolf tail on top */
+    sokka:
+      P.bust + P.neck + P.head +
+      '<path d="M94 42 C90 26 96 12 108 4 C102 18 102 30 108 42 Z" ' +
+      'fill="currentColor" opacity=".7"/>' +
+      '<path d="M58 74 C62 50 78 38 100 38 C122 38 138 50 142 74 ' +
+      'C128 62 72 62 58 74 Z" fill="currentColor" opacity=".62"/>' +
+      P.browsSoft + P.eyes + P.mouth +
+      '<path d="M70 172 L100 186 L130 172" fill="none" stroke="currentColor" ' +
+      'stroke-width="6" stroke-linecap="round" opacity=".5"/>',
+
+    /* fringe, big bun with a headband, unfocused eyes */
+    toph:
+      '<path d="M100 22 C112 22 122 30 122 40 C122 50 112 58 100 58 ' +
+      'C88 58 78 50 78 40 C78 30 88 22 100 22 Z" fill="currentColor" opacity=".55"/>' +
+      '<path d="M96 20 C88 8 106 4 110 14 C104 12 98 14 96 20 Z" ' +
+      'fill="currentColor" opacity=".5"/>' +
+      P.bust + P.neck + P.head +
+      '<path d="M54 82 C60 56 78 44 100 44 C122 44 140 56 146 82 ' +
+      'C136 70 118 84 100 84 C82 84 64 70 54 82 Z" fill="currentColor" opacity=".6"/>' +
+      '<rect x="52" y="70" width="96" height="9" rx="4.5" fill="currentColor" opacity=".72"/>' +
+      P.eyesBlind + P.mouth,
+
+    /* topknot, sharp brows, burn scar over the left eye */
+    zuko:
+      P.bust + P.neck + P.head +
+      '<path d="M92 40 C90 22 100 12 110 8 C104 20 104 30 108 40 Z" ' +
+      'fill="currentColor" opacity=".6"/>' +
+      '<path d="M60 72 C66 50 80 40 100 40 C120 40 134 50 140 72 ' +
+      'C126 62 74 62 60 72 Z" fill="currentColor" opacity=".55"/>' +
+      P.browsSharp + P.eyes + P.mouth +
+      '<path d="M60 88 C50 100 52 118 62 126 C74 124 82 112 80 98 ' +
+      'C76 88 68 84 60 88 Z" fill="currentColor" opacity=".3" ' +
+      'stroke="currentColor" stroke-width="2.5"/>',
+
+    /* topknot bun, full beard and moustache, kind eyes */
+    iroh:
+      P.bust + P.neck +
+      '<path d="M100 20 C112 20 120 27 120 36 C120 45 112 52 100 52 ' +
+      'C88 52 80 45 80 36 C80 27 88 20 100 20 Z" fill="currentColor" opacity=".5"/>' +
+      P.head +
+      '<path d="M56 96 C56 74 74 48 100 48 C126 48 144 74 144 96 ' +
+      'C134 78 116 68 100 68 C84 68 66 78 56 96 Z" fill="currentColor" opacity=".45"/>' +
+      P.browsSoft + P.eyes +
+      '<path d="M58 108 C58 148 76 174 100 174 C124 174 142 148 142 108 ' +
+      'C136 132 122 140 100 140 C78 140 64 132 58 108 Z" ' +
+      'fill="currentColor" opacity=".55"/>' +
+      '<path d="M78 122 q22 -10 44 0 q-22 8 -44 0 Z" fill="currentColor" opacity=".7"/>',
+
+    /* long hair, blunt bangs, crown topknot */
+    azula:
+      '<path d="M100 28 C144 28 164 62 160 106 C158 136 152 168 148 200 ' +
+      'C142 162 150 118 140 90 C126 102 74 102 60 90 C50 118 58 162 52 200 ' +
+      'C48 168 42 136 40 106 C36 62 56 28 100 28 Z" fill="currentColor" opacity=".55"/>' +
+      '<path d="M88 30 C86 14 96 6 106 2 C100 12 98 22 102 30 Z" ' +
+      'fill="currentColor" opacity=".6"/>' +
+      '<path d="M84 16 L100 4 L116 16 L108 18 L100 12 L92 18 Z" ' +
+      'fill="currentColor" opacity=".75"/>' +
+      P.bust + P.neck + P.head +
+      '<path d="M56 74 L144 74 L140 62 L60 62 Z" fill="currentColor" opacity=".62"/>' +
+      P.browsSharp + P.eyes +
+      '<path d="M90 130 q10 -4 20 0" fill="none" stroke="currentColor" ' +
+      'stroke-width="2.5" stroke-linecap="round" opacity=".6"/>'
+  };
+})();
+
+</script>
+<script>
+/* =========================================================================
    Episode index. `idx` is the global episode number across the whole series.
    Book One = 1..20, Book Two = 21..40, Book Three = 41..61.
    ========================================================================= */
@@ -1027,9 +1319,9 @@ window.ATLA.ELEMENTS.metal = {
 window.ATLA = window.ATLA || {};
 
 window.ATLA.books = [
-  { id: 1, name: 'Book One', element: 'water', subtitle: 'Water' },
-  { id: 2, name: 'Book Two', element: 'earth', subtitle: 'Earth' },
-  { id: 3, name: 'Book Three', element: 'fire', subtitle: 'Fire' }
+  { id: 1, name: 'Book One', short: 'Book I', element: 'water', subtitle: 'Water' },
+  { id: 2, name: 'Book Two', short: 'Book II', element: 'earth', subtitle: 'Earth' },
+  { id: 3, name: 'Book Three', short: 'Book III', element: 'fire', subtitle: 'Fire' }
 ];
 
 window.ATLA.episodes = [
@@ -1220,6 +1512,471 @@ window.ATLA.episodes = [
   { id: '3x21', idx: 61, book: 3, num: 21, title: 'Sozin\'s Comet, Part 4: Avatar Aang',
     logline: 'A rock in the back, a fourth option, and a chain on a grate. The last word of the series is spoken in a tea shop and it is "perfect".' }
 ];
+
+</script>
+<script>
+/* =========================================================================
+   Full plot synopses — Book One: Water.
+   Character-neutral, chronological, spoiler-complete for the episode.
+   ========================================================================= */
+
+window.ATLA = window.ATLA || {};
+window.ATLA.synopsis = window.ATLA.synopsis || {};
+
+Object.assign(window.ATLA.synopsis, {
+
+  '1x01': [
+    'Katara and Sokka, the last two teenagers of a Southern Water Tribe village that has lost every fighting man to the war, are out fishing on the ice. Katara catches a fish by waterbending and loses it; Sokka mocks her; the argument escalates until Katara loses her temper and, without meaning to, splits an iceberg in half. Inside is a glowing sphere with a boy and an enormous six-legged bison frozen in it.',
+    'Katara breaks the sphere open with Sokka\'s club and a beam of light shoots into the sky. The boy who climbs out is cheerful, twelve years old, and completely unbothered — his name is Aang, the bison is Appa, and the first thing he asks is whether Katara wants to go penguin sledding. Sokka is convinced he is a Fire Nation spy. Aang has no idea how long he has been in the ice, and when Katara asks whether he ever knew the Avatar, he says he knew people who knew him, and changes the subject.',
+    'Far to the north, Prince Zuko sees the beam of light from the deck of his ship. He has been searching for the Avatar for three years, and he tells his uncle Iroh — who insists the light is nothing and suggests they finish their game and go to bed — to change course south.',
+    'Aang is brought back to the village, where Gran Gran allows him to stay. He entertains the children, plays airball, and takes Katara penguin sledding, and then the two of them explore a derelict Fire Navy ship frozen into the ice nearby. Inside, Aang trips a century-old booby trap that fires a flare high over the South Pole. Zuko sees it and turns his ship toward the village.'
+  ],
+
+  '1x02': [
+    'The flare has given away the village\'s position. Sokka, holding himself responsible for its defence, banishes Aang, who leaves without arguing. Katara tells her brother that if Aang goes, she goes too, but Aang is gone on Appa before she can follow.',
+    'Zuko\'s warship shears through the village\'s ice wall. Sokka puts on his father\'s war paint and charges it alone with a boomerang, and is knocked aside in seconds. Zuko demands the villagers produce the Avatar, threatening an elderly woman, until Aang comes back — sledding in on a penguin — and reveals himself. He surrenders on the condition that the village is left alone.',
+    'Aboard the ship, Aang escapes his guard, retrieves his staff from Zuko\'s quarters and fights his way up through the decks, but Zuko forces him over the side into the freezing water. Aang comes back up in a rising column of sea water with his tattoos and eyes glowing white, sweeping Zuko and his crew off the deck. When it stops he collapses, remembering none of it. Katara and Sokka, who have followed on Appa, pull him aboard.',
+    'They escape, and Gran Gran sends Katara and Sokka north with him — Katara to find a waterbending master, Aang to learn the elements. Aang admits he is the Avatar and that he ran away from the temples a hundred years ago rather than accept it. Zuko, ship damaged, orders his crew to follow.'
+  ],
+
+  '1x03': [
+    'Aang insists on stopping at the Southern Air Temple, certain that the Air Nomads survived. On the way he tells Katara and Sokka about his childhood there and about Monk Gyatso, the guardian who raised him. Katara and Sokka both suspect what they will find and cannot bring themselves to warn him.',
+    'The temple is empty. Aang shows them the airball court and his old room, and a flashback reveals why he left: the monks told him he was the Avatar four years early because the war was coming, his friends stopped playing with him, and when the council decided to separate him from Gyatso he took Appa and flew away into a storm.',
+    'They find a Fire Nation helmet in the snow, which Katara buries under an avalanche to hide it. Aang follows a flying lemur — whom Sokka is trying to eat — into a ruined tent and finds the bodies of a squad of Fire Nation soldiers and Gyatso\'s skeleton among them. His grief triggers the Avatar State: the temple begins to tear itself apart in a spiral of wind, and every Avatar statue in the world lights up at once, alerting the Fire Sages far away. Katara walks into the storm and tells him that the airbenders are gone but that she and Sokka are his family now, and he comes down.',
+    'Aang accepts that he is the last airbender, adopts the lemur and names him Momo. Meanwhile at a Fire Nation harbour, Commander Zhao learns from Zuko\'s crew that the Avatar is alive and takes the hunt for himself. Zuko challenges him to an Agni Kai, wins, and refuses to burn him when he is down; Zhao attacks his back as he leaves and Iroh catches the blow without appearing to move.'
+  ],
+
+  '1x04': [
+    'Aang diverts the group to Kyoshi Island to ride the elephant koi, and is nearly eaten by a sea serpent called the unagi. On the beach the three of them are ambushed, blindfolded and tied up by the Kyoshi Warriors, an all-female fighting force led by Suki. The village elder Oyaji accuses them of being Fire Nation spies until Aang airbends out of his bonds and proves he is the Avatar.',
+    'The island, which was Avatar Kyoshi\'s home and has statues of her everywhere, celebrates him. Aang enjoys the attention enormously, showing off for a crowd of girls and stretching a one-day stop into several, which infuriates Katara. Sokka tells the Kyoshi Warriors that girls cannot fight, is comprehensively beaten by Suki in the training hall, and then returns, apologises properly and asks to be taught. She agrees on the condition that he wear the uniform and face paint, and teaches him that combat is not about strength but about turning an opponent\'s force against them.',
+    'Word of the Avatar\'s presence reaches Zuko, who lands on the island with rhino cavalry and starts burning the village to force Aang out. The Kyoshi Warriors fight the soldiers in the streets. Aang duels Zuko on a rooftop and realises that staying is what has put the island in danger.',
+    'They flee on Appa. Sokka apologises to Suki for his earlier disrespect and she kisses him on the cheek, telling him she is a warrior and a girl. As they leave, Aang dives off Appa into the bay, seizes the unagi and forces it to spray a jet of water across the burning village, putting out the fires before climbing back aboard.'
+  ],
+
+  '1x05': [
+    'Aang takes the group to Omashu, the Earth Kingdom city where he used to visit his friend Bumi a hundred years earlier. He gets them through the gate with a disguise and then hijacks the city\'s stone delivery chutes as a slide, causing a spectacular crash that destroys a cabbage merchant\'s cart and much of a district.',
+    'They are arrested and brought before the king — an ancient, erratic man who serves them dinner and then announces that Aang must complete three "deadly challenges" or his friends will be encased in creeping jennamite crystal, which is already growing over Katara and Sokka\'s hands.',
+    'Each challenge is unsolvable as presented. Aang can only retrieve a key from behind a waterfall by breaking off a stalactite and firing it like a dart to cut the chain. The king\'s "lost pet" is not the small creature Aang chases but the goat gorilla chasing him. In the final challenge he must duel one of two enormous warriors, and instead chooses the frail old king himself — who turns out to be an extremely powerful earthbender.',
+    'The king reveals himself as Bumi, now a hundred and twelve. He set the whole thing up to make a point: Aang must stop approaching problems the obvious way and start thinking like a mad genius, because he will need to. Bumi also tells him he will need an earthbending teacher who listens and waits rather than one who attacks. He frees Katara and Sokka, and he and Aang ride the mail chutes together before the group moves on.'
+  ],
+
+  '1x06': [
+    'The group meets Haru, a young earthbender in a Fire Nation-occupied village where earthbending has been outlawed and every bender deported. Katara sees him secretly use his bending to save an old man from a collapsed mine — and the old man immediately informs on him for the reward. Haru is arrested and shipped out.',
+    'Determined to get him back, Katara fakes an earthbending display — with Aang hidden above throwing rocks — and has herself arrested. She is taken to a Fire Nation prison rig: a metal platform anchored far out at sea, deliberately built so that the earthbenders held there have nothing to bend.',
+    'What she finds is worse than cruelty. The prisoners, including Haru\'s father Tyro, have given up entirely; the Warden has convinced them they are helpless, and Tyro tells her to keep her head down. Katara gives an impassioned speech about her mother and her tribe and it lands on total silence. Aang and Sokka then blow the rig\'s coal supply up through the ventilation shafts, showering the deck with earth, and Katara begs the prisoners to use it. For a long moment nobody moves.',
+    'Haru is the first to lift a piece of coal. The prisoners rise, Tyro drives the Warden into the sea, and the earthbenders take the rig\'s ships and sail for home. Afterwards Katara realises she has lost her mother\'s betrothal necklace somewhere on the rig; Zuko finds it in the wreckage.'
+  ],
+
+  '1x07': [
+    'The group flies over a forest that Fire Nation soldiers have burned to ash. Aang takes it as his failure; Katara shows him the acorns scattered through the cinders as proof that the forest will grow back.',
+    'At nearby Senlin Village they learn that a spirit called Hei Bai comes out of the woods at sunset and carries people away, and the villagers beg the Avatar — as bridge between the human and spirit worlds — to stop it. Aang has no training for this at all. He confronts the enormous black-and-white spirit, tries to talk to it, is thrown through several buildings, and watches it seize Sokka and vanish.',
+    'Chasing it, Aang crosses into the Spirit World without meaning to, leaving his body behind. There he meets Fang, the dragon of Avatar Roku, who tells him Roku has an urgent message that can only be delivered at the temple on Crescent Island, and only on the winter solstice — which is the next day.',
+    'Meanwhile Iroh stops at a hot spring to bathe and is captured by an Earth Kingdom patrol. Zuko abandons the hunt to go after him, tracks the soldiers down and defeats them single-handed moments before they can execute him. Back at the village Aang returns and works out that Hei Bai is not enraged but grieving for the burned forest. He holds out an acorn; the spirit calms, shrinks into a panda, walks back into the trees and releases everyone it took, Sokka included.'
+  ],
+
+  '1x08': [
+    'To reach Roku\'s temple by sunset Aang must fly into Fire Nation waters and through Zhao\'s naval blockade. He tries to go alone; Katara and Sokka refuse and get on the bison anyway. Sokka works out that Appa can cross above the blockade if they use the ships\' own smoke as cover, and Aang deflects a fireball mid-air on the way through. Zhao lets Zuko\'s damaged ship slip past on purpose, intending to follow it to the Avatar.',
+    'At the temple on Crescent Island they are attacked by the Fire Sages, who have served the Fire Lord since Sozin forced them to. One of them, Shyu, is loyal to the Avatar and leads them to the sanctuary door, which will only open for five firebenders or for a fully realised Avatar. Sokka improvises a fake-firebending bomb out of lamp oil; it fails and the noise brings the other sages, who capture him and Katara.',
+    'Zuko, who has infiltrated the temple, seizes Aang from behind — and in doing so pushes him through the sanctuary doors as they close. Zuko is then chained to a pillar beside the others, and Zhao arrives, takes command, seizes Zuko\'s crew and orders him held.',
+    'Inside, Roku appears to Aang and delivers the message: Sozin\'s Comet, which gave Fire Lord Sozin the power to begin the war, returns at the end of summer, and if the Avatar has not mastered all four elements by then the Fire Nation will win outright. Roku then takes control of Aang\'s body, walks it out through the sages, and cracks the volcano beneath the temple, destroying it. Appa carries them out as the island collapses into lava; Zuko escapes in the confusion.'
+  ],
+
+  '1x09': [
+    'Katara begins teaching Aang waterbending, and he masters the water whip in a handful of attempts — something that took her years of practising alone. She snaps at him and immediately regrets it.',
+    'At a river port they browse a curio shop that Sokka correctly identifies as a pirate fence. Katara finds a genuine waterbending scroll, cannot afford it, and steals it. The pirates come after them, and that night Katara sneaks off alone to practise from the scroll rather than fall further behind her student.',
+    'She is caught by Zuko, who ties her to a tree and produces her mother\'s betrothal necklace, recovered from the prison rig, offering to trade it for the Avatar. Aang, Sokka and Momo are captured by the pirates, and Zuko strikes a deal with them: he takes the Avatar, they take the scroll back.',
+    'Sokka stalls by pitching the pirate captain on the untapped commercial potential of a giant flying bison, long enough for the group to break free. The pirates work out that the Avatar is worth more than a scroll and turn on Zuko, and in the running fight down the river both the pirate ship and Zuko\'s plan are destroyed. Katara confesses the theft and Aang says nothing about it — then reveals he grabbed the scroll on the way out.'
+  ],
+
+  '1x10': [
+    'The group is attacked by Fire Nation soldiers in a forest and rescued by Jet and his Freedom Fighters, a band of orphaned teenagers living in a treetop hideout. Jet is charming and capable, Aang is thrilled to be included, and Katara — who recognises his loss as the same as her own — is instantly taken with him. Sokka distrusts him from the first minute.',
+    'Sokka watches Jet beat and rob an unarmed old man in the woods and is told the man was a Fire Nation assassin with a hidden weapon. He does not believe it, and neither Katara nor Aang will hear it. Jet asks Katara and Aang to help fill the reservoir above the valley with water, saying the Fire Nation plans to burn the forest.',
+    'Following him at night, Sokka overhears the real plan: barrels of blasting jelly packed at the dam, and the filled reservoir released to wash away the whole town of Gaipan below — Fire Nation occupiers and civilians alike. The Freedom Fighters catch him and tie him to a tree.',
+    'Sokka gets loose and runs the whole way to the valley, and manages to evacuate the town up the hillside before the dam blows. Katara and Aang confront Jet at the reservoir; he does not deny the plan and defends it as an acceptable price, and Katara freezes him to a tree. The group leaves, and Jet is cut loose by his followers.'
+  ],
+
+  '1x11': [
+    'At the Great Divide, the largest canyon in the world, the group encounters two refugee tribes waiting to cross: the fastidious Gan Jin and the rough-living Zhang, who have hated each other for a hundred years over a crime nobody alive witnessed. Each side tells a version in which their ancestor was wronged by the other\'s.',
+    'Aang insists on helping both across at once, and they hire a canyon guide, an earthbender who shapes the walls to make a path. Partway down, canyon crawlers attack and break the guide\'s arms, leaving him unable to bend and the whole party trapped at the bottom with no way up.',
+    'Aang separates Katara and Sokka, sending each to travel with one tribe and gather their side of the story. Both promptly become fiercely partisan and spend the rest of the descent arguing with each other. The tribes\' mutual sabotage over food and rules nearly gets everyone killed.',
+    'When the canyon crawlers attack in force, the two tribes are forced to cooperate — muzzling and riding the creatures out of the canyon together. At the top, Aang settles the feud by simply inventing a better story: that the two ancestors were eight-year-old twin brothers playing a game and the whole century has been a misunderstanding. Both tribes believe him and reconcile, and Aang admits to Katara and Sokka afterwards that he made it up.'
+  ],
+
+  '1x12': [
+    'A fisherman at a coastal village recognises Aang and blames the Avatar for abandoning the world for a hundred years, and Aang flies off rather than answer him. Sokka, who has taken a day\'s work on the man\'s boat for money, defends Aang to him as a storm gathers.',
+    'Sheltering in a cave, Aang finally tells Katara the whole story: the monks revealed he was the Avatar four years early, his friends stopped playing with him, and when the council announced they were sending him to the Eastern Air Temple to separate him from Gyatso, he took Appa and fled that night — into a storm, into the ocean, and into the iceberg. He says plainly that the war happened because he ran away.',
+    'Aboard Zuko\'s ship, Iroh tells the crew the story Zuko will not. At thirteen Zuko talked his way into a war council and spoke out of turn against a general\'s plan to sacrifice a division of new recruits as bait. Ozai ruled that the disrespect must be answered in an Agni Kai — and when Zuko turned to face his opponent it was his father. He refused to fight, knelt and begged, and Ozai burned his face in front of the court and banished him, with the capture of the Avatar as the condition of his return.',
+    'In the present, Zuko sights the Avatar in the storm and then orders his ship turned away to safer water for his crew\'s sake, which Iroh notes with quiet approval. Aang and Katara go out into the storm, where Aang pulls Sokka and the fisherman off their wrecked boat, holding the ocean open around them in the Avatar State. On the beach afterwards the fisherman thanks him.'
+  ],
+
+  '1x13': [
+    'Katara and Sokka fall badly ill after the storm. Aang climbs a mountain to find a herbalist, who tells him the cure is frozen wood frogs from the swamp below, which must be kept frozen and sucked on.',
+    'Newly promoted Admiral Zhao deploys the Yuyan Archers, marksmen who can pin a fly to a tree from a hundred yards, and they capture Aang while he is collecting the frogs. He wakes shackled at the wrists and ankles in Pohuai Stronghold, with Zhao explaining that he will be kept alive and imprisoned for the rest of his life.',
+    'A masked figure in a blue demon mask infiltrates the fortress, cuts Aang free with two dao swords, and fights their way out without saying a word or using a single flame. Aang, delighted, chatters throughout about what a good team they make. At the outer wall an archer drops the masked stranger.',
+    'Aang drags him clear and waits for him to wake — and when he pulls the mask off, it is Zuko. When Zuko comes round, Aang tells him that a hundred years ago he was friends with a Fire Nation boy, and asks whether the two of them could have been friends in another life. Zuko answers with a blast of fire and flees. Aang collects more frogs and returns to Katara and Sokka, who recover, and refuses to explain the mask.'
+  ],
+
+  '1x14': [
+    'The group is brought to Makapu Village, which sits at the foot of an active volcano and runs every decision — planting, marriage, roofing, weather — on the predictions of a fortuneteller named Aunt Wu. Sokka is scathing; Katara is sceptical for about a minute and then completely won over when Aunt Wu tells her she will marry a very powerful bender.',
+    'Aang, hopelessly in love with Katara, spends the episode trying to engineer the prophecy so that it points at him, including climbing the volcano\'s rim to fetch her a panda lily. Aunt Wu tells him only that he will be involved in a great battle.',
+    'From the crater Aang can see that the volcano is close to erupting, but the village will not evacuate because Aunt Wu has predicted a safe year and the prediction is more real to them than the mountain. Sokka argues the evidence and is ignored and disliked for it.',
+    'Aang and Katara go up and bend the clouds into a written warning across the sky — a message the village will believe because it comes in the form of a sign. The villagers evacuate; Sokka organises a trench and a wall to divert the lava; Aang stands in the flow\'s path and freezes it with a blast of air. Afterwards Aunt Wu tells Aang that she gave the village the futures it needed, and that just as he shaped the clouds, it is on him to shape his own destiny.'
+  ],
+
+  '1x15': [
+    'The group finds Water Tribe artefacts and then a beached ship from Hakoda\'s fleet, and shortly afterwards Bato — an old friend of Katara and Sokka\'s father, wounded and recovering at an abbey run by nuns. Surrounded by their father\'s things and stories, Katara and Sokka light up, and Aang begins to feel himself edged out of the family he was given at the Southern Air Temple.',
+    'A messenger arrives with a map to Hakoda\'s rendezvous point. Aang intercepts it and hides it, and then has to live with that while Bato includes him in the Water Tribe ice-dodging ceremony, where Sokka is marked with the Mark of the Wise, Katara with the Mark of the Brave, and Aang with the Mark of the Trusted.',
+    'Meanwhile Zuko hires June, a bounty hunter with a shirshu — a blind beast that tracks by scent and cannot be evaded by flight — and gives her Katara\'s necklace as the scent to follow. It takes them straight to the abbey.',
+    'Aang confesses about the map at the worst possible moment, and Katara and Sokka leave with Bato. They turn back when they realise Aang is being hunted. In the fight at the abbey Sokka has the nuns dump their entire stock of perfume into the air, overwhelming the shirshu\'s nose; it lashes out and paralyses everyone including Zuko and June. Aang recovers Katara\'s necklace, and Sokka tells him plainly that he is their family too.'
+  ],
+
+  '1x16': [
+    'The group sneaks into a Fire Nation festival in disguise. Aang blows their cover saving Katara from a firebending performer\'s stunt, and they escape with the help of a deserter named Chey, who takes them to Jeong Jeong — a firebending master who abandoned the Fire Nation army and lives in the woods with a small band of followers.',
+    'Jeong Jeong refuses to teach the Avatar, saying he has no discipline and that fire is a curse that only destroys. He relents only when Avatar Roku appears to him in the flames and asks whether he thinks himself too weak.',
+    'The training is breathing exercises, meditation, and holding a small flame at the edge of a leaf without letting it reach the centre. Aang, conscious of a comet on a deadline, decides he is ready and copies the showy move he saw the performer make at the festival. The flame comes out enormous and burns Katara\'s hands badly.',
+    'Katara runs to the river, and when she puts her hands in the water it glows and the burns heal — she discovers she can heal, in front of a master who has spent his life insisting his element only destroys. Aang, horrified, refuses to firebend again. Zhao\'s boats arrive to arrest Jeong Jeong, and Aang fights the Admiral by refusing to fight back, dodging until Zhao has set fire to his own fleet — the lesson in restraint, learned in one day by watching what happens without it.'
+  ],
+
+  '1x17': [
+    'Hearing rumours of airbenders in the north, Aang flies to the Northern Air Temple and finds it occupied by Earth Kingdom refugees who have bolted pipes, pulleys and hot-air machinery all over his people\'s monastery. He meets Teo, a boy who uses a wheelchair and flies with a glider rig built by his father, and Aang\'s anger at the desecration is real until Teo takes him up over the mountain.',
+    'Sokka is immediately absorbed by the workshop of Teo\'s father, the Mechanist, and the two of them talk engineering while Aang and Katara explore. Katara notices that the Mechanist is hiding something and Sokka follows him at night into the fog.',
+    'The secret is a sealed sanctuary full of war balloon prototypes and a Fire Nation minister waiting for delivery: the colony\'s survival has been bought with a new weapon every month, under threat of being burned out.',
+    'The Fire Nation arrives in force with tanks. Aang, Katara and the gliders defend the temple while Sokka and the Mechanist finish the war balloon, and when bombing is not enough Sokka cuts the balloon\'s engine loose and drops it into a gas-filled chasm below, destroying the invasion force. The temple holds, and the Mechanist and his colony are freed from the arrangement.'
+  ],
+
+  '1x18': [
+    'The group reaches the Northern Water Tribe, an intact walled city of ice, and are welcomed with a feast by Chief Arnook. Sokka meets Princess Yue and is immediately smitten. Aang and Katara ask Master Pakku for training, and Pakku accepts Aang and tells Katara that in the North it is forbidden for women to learn combat waterbending — she may join the healing classes instead.',
+    'Katara is furious. Aang begins secretly teaching her his lessons at night, and when they are caught Pakku drops Aang as a student. Katara challenges Pakku to a duel in front of the whole tribe. She fights the greatest waterbender alive to a genuine standstill before he traps her in an icicle cage.',
+    'During the fight her betrothal necklace comes loose, and Pakku recognises it: he carved it sixty years ago for Kanna, who was promised to him in an arranged marriage and fled the Northern Water Tribe rather than accept it — Katara\'s grandmother. Pakku agrees to teach her, and Katara trains as a combat waterbender.',
+    'Sokka takes Yue out on the canals and it goes well until she tells him she is betrothed to another man by arrangement. Meanwhile Zuko arrives at the northern fleet to find Zhao promoted to Admiral and given command of an invasion; Zhao then hires pirates to blow up Zuko\'s ship in harbour. Zuko survives, is presumed dead by the entire Fire Nation, cuts his hair and boards Zhao\'s flagship in a stolen uniform.'
+  ],
+
+  '1x19': [
+    'Zhao\'s fleet — hundreds of ships — arrives outside the Northern Water Tribe and the siege begins. Aang attacks the ships single-handed and destroys several, but comes back to the wall exhausted, telling Katara that he is one kid and the Fire Nation is a nation.',
+    'Zhao halts the assault at nightfall, knowing that waterbenders draw strength from the full moon. Arnook organises a mission to infiltrate the flagship and assassinate the Admiral; Sokka volunteers, gets into a fight with Hahn — Yue\'s betrothed, who is condescending about southerners — and is reassigned to guard the princess instead.',
+    'Aang decides that force will not win this and goes to the Spirit Oasis, a warm garden under the ice where two koi fish, one black and one white, circle each other in a pond. He works out that they are the Moon and Ocean spirits, and meditates to cross into the Spirit World, leaving his body defenceless on the grass with Katara guarding him.',
+    'Zuko, meanwhile, has come under the city through a flooded tunnel alone and surfaces in the Oasis half-frozen. He and Katara fight a long duel; he overpowers her at the end of the night, takes Aang\'s unconscious body, and carries it out into a blizzard as the Fire Nation breaches the outer wall.'
+  ],
+
+  '1x20': [
+    'In the Spirit World, Aang seeks out Koh the Face Stealer to ask about the Moon and Ocean spirits, and must hold his face completely expressionless while Koh circles him, or lose it. He learns that the spirits crossed into the mortal world at the beginning and take the form of the two koi: Tui, push, and La, pull.',
+    'Katara catches up to Zuko in a snowfield at sunrise and defeats him outright, recovering Aang. Zhao, guided by information from an old Fire Sage library, finds the Spirit Oasis and pulls the white koi out of the water in a bag. Iroh warns him that killing it will cost the world more than he can imagine and to put it back; Zhao does it anyway. The moon goes out, the sky turns red, and every waterbender in the world loses their bending mid-motion.',
+    'Iroh turns on his own side, wrecking Zhao\'s guard and forcing the fish back into the water, but it is dead. Princess Yue reveals that she was born sick and dying and that the Moon Spirit gave her its life; she gives it back, dying in Sokka\'s arms as the moon returns to the sky.',
+    'Aang wades into the pond and merges with the Ocean Spirit. What rises out of the harbour is a vast leviathan of black water with Aang glowing at its heart, and it destroys the Fire Nation fleet, sweeping Zhao under. Zuko finds Zhao in the streets, fights him, and then offers him his hand when the spirit takes him; Zhao refuses it and drowns. Iroh brings Aang back to his friends and then leaves the Fire Nation for good, sailing away with his nephew in a small boat. In the Fire Nation capital, Ozai tells his daughter Azula that his brother is a traitor and his son a failure, and gives her a task.'
+  ]
+});
+
+</script>
+<script>
+/* =========================================================================
+   Full plot synopses — Book Two: Earth.
+   ========================================================================= */
+
+window.ATLA = window.ATLA || {};
+window.ATLA.synopsis = window.ATLA.synopsis || {};
+
+Object.assign(window.ATLA.synopsis, {
+
+  '2x01': [
+    'Pakku sends the group south with waterbending scrolls and a vial of water from the Spirit Oasis, which he tells Katara has unique properties. At an Earth Kingdom base, General Fong greets Aang as the weapon that will end the war: he has heard what happened at the North Pole and wants Aang to enter the Avatar State on command and destroy the Fire Nation outright, skipping earth and fire entirely.',
+    'Aang agrees to try. Fong subjects him to escalating provocations — being buried, attacked, thrown around — and none of it works. Katara argues throughout that this is not a plan and that the Avatar State is not a switch, and is ignored.',
+    'Fong finally sinks Katara into the ground to fake her death in front of Aang. It works: the Avatar State takes him and the fortress is torn apart. Inside it, Roku explains what the state actually is — a defence mechanism that grants Aang the skill of every Avatar before him — and warns that if he is killed while in it, the Avatar cycle is broken permanently. Aang refuses to use it again this way and the group leaves.',
+    'Meanwhile a Fire Nation ship arrives for Zuko and Iroh with news that Ozai has forgiven his son. It is Azula, and the letter is a trap; Iroh spots it when her captain refers to them as prisoners. They fight their way overboard and escape into the Earth Kingdom, and to avoid recognition the two of them cut off their topknots — a formal severance from the Fire Nation — and drop them in a stream.'
+  ],
+
+  '2x02': [
+    'The group falls in with a band of wandering nomads led by Chong, who tell them about a shortcut to Omashu through the Cave of Two Lovers — a labyrinth said to be navigable only by those who trust in love, and which supposedly rearranges itself for anyone else.',
+    'The tunnel collapses behind them and the party is split: Sokka with the nomads, Aang and Katara alone. Their torch burns out, leaving them in the dark with a tomb bearing the story of Oma and Shu, two lovers from warring villages who built the tunnels to meet in secret, and who invented earthbending by learning from badgermoles.',
+    'Aang works out that the curse is a riddle about light, and haltingly suggests they try what the tomb says the lovers did. They kiss in the dark; crystals light up along the ceiling and the way out appears. Sokka\'s group, meanwhile, is walked out of the labyrinth by two badgermoles who follow the nomads\' singing.',
+    'Elsewhere, Iroh mistakes a white jade bush for tea, brews it, drinks it and is badly poisoned. Zuko seeks help and they are taken in by a girl named Song and her mother, who feed them; Song shows Zuko a Fire Nation burn scar on her own leg. When they leave, Zuko steals the family\'s ostrich horse. The group reaches Omashu to find it flying Fire Nation flags.'
+  ],
+
+  '2x03': [
+    'Omashu has fallen without a fight and been renamed New Ozai. Azula has taken command of the city from its Fire Nation governor. Aang, Katara and Sokka sneak in disguised to rescue King Bumi, whom they find suspended in a metal coffin.',
+    'Azula, meanwhile, collects the two people she wants for her hunt. She finds Mai — the governor\'s daughter, bored to the point of pain in the occupied city — who joins immediately. She finds Ty Lee performing at a circus, and when Ty Lee refuses, Azula sets the safety net on fire mid-performance and asks again.',
+    'The group triggers a citywide evacuation using a fake plague they call pentapox, marking the population with sucker-marks from purple pentapi and walking them out through the gate moaning. In the confusion Momo carries off Tom-Tom, the governor\'s infant son, giving them a hostage to trade.',
+    'Aang offers Tom-Tom for Bumi. Azula cancels the exchange, pointing out that a two-year-old is not fair value for a great earthbender, and a chase follows in which Mai and Ty Lee prove devastating — Ty Lee blocks Katara\'s chi and drops her mid-bend. Bumi refuses rescue: he surrendered deliberately and is practising neutral jing, waiting for the right moment to act, and he tells Aang to find an earthbending teacher who listens and waits. The group returns Tom-Tom to his parents and leaves without him.'
+  ],
+
+  '2x04': [
+    'A strange tornado pulls Appa out of the sky over a vast swamp and separates the group. Aang is alone; Katara and Sokka find each other; Appa and Momo are taken by something.',
+    'The swamp starts showing them things. Katara sees her mother standing in the water and runs to her, and it is a stump. Sokka sees Princess Yue, who tells him it was his fault she died. Aang chases a laughing girl in an Earth Kingdom dress whom he has never seen before and cannot catch.',
+    'They are attacked by a waterbender who bends the swamp\'s vines and moisture and appears to be a walking mass of plant matter. He turns out to be Huu, a member of a tribe of swamp waterbenders, and he takes them to the banyan-grove tree at the swamp\'s centre: a single tree whose roots run for miles, so that everything above ground is connected underneath whether it knows it or not. Time and death, he says, are illusions, and the people they have lost are not somewhere else.',
+    'Appa and Momo are recovered from the swamp tribe, who had intended to eat them. Aang concludes that his vision was not of someone he has lost but of someone he has not met yet.'
+  ],
+
+  '2x05': [
+    'The group arrives at Chin Village during Avatar Day, an annual festival at which the townspeople burn effigies of the Avatar. Aang, offended, demands to know why — and is promptly arrested and put on trial for the murder of Chin the Great, committed by Avatar Kyoshi four hundred years earlier.',
+    'The town\'s justice system offers no defence and the punishment is execution by boiling oil. Katara and Sokka travel to Kyoshi Island to investigate, examine the one surviving piece of evidence, and establish that the footprint at the scene is far too small to belong to Kyoshi. The town ignores the finding.',
+    'Katara instead dresses Aang in Kyoshi\'s robes, fan and makeup, and Kyoshi herself manifests to give evidence. She explains that Chin the Conqueror was annexing the peninsula and refused to negotiate, so she split the land away from the mainland to protect her people — creating Kyoshi Island — and Chin, standing at the edge, refused to move and fell. She is entirely unrepentant, and Aang is technically convicted anyway.',
+    'The Rough Rhinos, a Fire Nation raiding party, attack the village during the trial. Aang and the group drive them off, and the town commutes the sentence and replaces Avatar Day with a festival celebrating them. Sokka is left insisting, correctly and to nobody\'s interest, that he solved the case with evidence.'
+  ],
+
+  '2x06': [
+    'Aang recognises the girl from his swamp vision on a poster for Earth Rumble VI, an underground earthbending tournament in Gaoling. The group attends, and the champion is the Blind Bandit — a small blind twelve-year-old girl who beats every fighter in the ring, including the enormous Boulder, by waiting for opponents to commit their weight and then using it against them.',
+    'Aang tries to speak to her and is thrown out of the arena. Following her home, he discovers she is Toph Beifong, daughter of the wealthiest family in the province, who present her publicly as fragile and helpless and forbid her to leave the estate. She has been sneaking out to fight for years and learned earthbending as a small child from badgermoles in the caves beneath the house.',
+    'Aang, invited to dinner, tries to persuade her to become his teacher and she refuses. Xin Fu, the tournament organiser, and Master Yu, her paid tutor, kidnap both of them for the reward money.',
+    'Toph\'s father comes to the arena and, in front of her, describes her as helpless. She takes down the entire Earth Rumble roster single-handed to prove otherwise, and her father responds by tightening her confinement further. That night she leaves, catches up to the group on the road, and joins them as Aang\'s earthbending teacher.'
+  ],
+
+  '2x07': [
+    'The only episode of the series in which Team Avatar does not appear. Zuko, now travelling alone through the Earth Kingdom on a stolen ostrich horse, arrives at a farming village policed by a gang of thuggish Earth Kingdom soldiers. He is taken in by a family whose eldest son has already gone to the war, works for his food, and befriends their younger boy, Lee, giving him a knife Iroh sent from the front, inscribed "never give up without a fight".',
+    'Interleaved flashbacks assemble his childhood. His mother Ursa is warm to him; his sister Azula, aged nine, is already a prodigy, a fluent liar and openly cruel. News arrives from Ba Sing Se that Iroh\'s son Lu Ten has been killed, and Iroh abandons the six-hundred-day siege and comes home.',
+    'Ozai uses his brother\'s bereavement to petition Fire Lord Azulon for Iroh\'s birthright. Azulon is enraged and orders Ozai to know the pain of losing a firstborn — by killing Zuko. Ursa learns of it, makes a bargain to save her son, and comes to Zuko in the night to tell him that everything she has done she did to protect him, and that whatever happens he must never forget who he is. By morning she is gone, Azulon is dead, and Ozai is Fire Lord.',
+    'In the present the soldiers return, and Zuko fights them with his dual swords to protect Lee\'s family. He wins, and then tells them who he is — Prince Zuko, son of Ursa and Fire Lord Ozai. The village turns on him, refuses his help, and Lee tells him he hates him. Zuko rides away alone.'
+  ],
+
+  '2x08': [
+    'A Fire Nation tank train — a machine that never stops, crewed in shifts — begins chasing the group and cannot be shaken. Three days of forced marches without sleep leave everyone exhausted and short-tempered, and Katara and Toph have a serious falling-out over whether Toph should help with the camp.',
+    'Toph leaves the group. Sokka works out why they cannot escape: Appa is shedding, leaving a trail of fur across the whole province. Aang sends Katara, Sokka and Appa away and stands alone in the abandoned town of Tu Zin to face whoever is pursuing them.',
+    'It is Azula, with Mai and Ty Lee. Zuko, hunting the same machine on his own account, arrives and fights her; then Aang, then Katara and Sokka, then Toph, and finally Iroh, until six benders have Azula surrounded in a semicircle.',
+    'Azula raises her hands and surrenders — and in the instant everyone\'s guard drops, shoots lightning into Iroh\'s chest and escapes in the confusion. Katara offers to heal him and Zuko drives the group off with fire, screaming at them to get away from his uncle. The group leaves, and Zuko is left to carry Iroh away alone.'
+  ],
+
+  '2x09': [
+    'Toph begins teaching Aang earthbending using the method she learned from badgermoles: stand your ground and meet force head-on. It is the opposite of every airbending instinct Aang has, and his body refuses to do it. Toph\'s teaching style is relentless contempt; Katara suggests encouragement instead and that fails too.',
+    'Sokka, hunting for dinner, falls into a deep crevasse and is trapped there for most of the episode, negotiating with a groundhog and promising the universe he will become a vegetarian if rescued.',
+    'Toph eventually finds Sokka and earthbends him out. A saber-tooth moose lion, whose cub Sokka disturbed, charges — and Aang, with no time to think about the exercise, plants his feet and pushes, moving a boulder and earthbending for the first time.',
+    'In parallel, Iroh — recovering from the lightning wound — teaches Zuko to generate lightning, and then tells him plainly that he cannot: the technique requires a mind free of conflict, and Zuko is full of shame and anger. Instead Iroh teaches him lightning redirection, a technique he invented by studying waterbenders, which routes a bolt through the stomach and out the other arm rather than the heart. Zuko asks Iroh to fire real lightning at him for practice; Iroh refuses. Zuko rides into a thunderstorm on a clifftop and screams at the sky to strike him, and it does not.'
+  ],
+
+  '2x10': [
+    'At the Misty Palms Oasis the group meets Professor Zei, an anthropologist from Ba Sing Se University who has spent years searching the Si Wong Desert for the library of Wan Shi Tong, a knowledge spirit. Sokka, looking for anything that could win the war, persuades the others to help him find it.',
+    'They locate a single tower protruding from the sand; the rest of the enormous building is buried. Toph, unable to read and of little use inside, stays outside with Appa. Wan Shi Tong — a giant black owl — initially refuses them entry, saying humans only ever use knowledge as a weapon, and relents when they offer tributes.',
+    'In a fire-damaged wing Sokka finds a scrap of parchment referring to "the darkest day in Fire Nation history". A fox leads them to a planetarium, where they reconstruct the date and discover it was a total solar eclipse — during which every firebender in the world loses their bending. Sokka realises this is an invasion plan.',
+    'Wan Shi Tong works out what they came for, declares that humans will no longer have his knowledge, and begins sinking the entire library into the sand with them inside. Toph holds the structure up with her body while the others escape — and while she is doing so, sandbenders arrive, muzzle Appa and steal him. She can feel it happening and cannot let go. The group surfaces with the eclipse and without the bison.'
+  ],
+
+  '2x11': [
+    'Stranded in the Si Wong Desert with no water and no bison, the group begins walking. Aang, wild with grief and anger, blames Toph for letting the sandbenders take Appa, then stops speaking to anyone and flies ahead on his glider for long stretches.',
+    'Toph is effectively blind: sand shifts and will not transmit vibration, so her earth-sense is reduced to fog and she has to be led. Sokka drinks from a cactus against advice and spends hours hallucinating happily, addressing the landscape as a friend. Katara takes over completely — rationing the water, navigating by the stars, and quietly taking the library scroll from Toph, who cannot read it.',
+    'They are attacked by giant buzzard wasps and shelter in the wreck of a sand-sailer. When sandbenders arrive, Toph recognises the voice of one of them from the library, and the group learns that Appa was muzzled and sold to merchants bound for Ba Sing Se.',
+    'Aang enters the Avatar State and tears the sandbenders\' sailers apart in a vortex of wind and sand with the tribe cowering inside it. Everyone runs except Katara, who walks into the middle of it and holds onto him until it stops. They reach the edge of the desert and set out for Ba Sing Se.'
+  ],
+
+  '2x12': [
+    'Aang announces that he has let go of his attachment to Appa and feels nothing, and maintains an unsettling calm for most of the episode. At a refugee camp the group meets Suki, now leading the Kyoshi Warriors as escorts, and a pregnant woman named Ying and her family, who have lost their passports to Ba Sing Se and must take the Serpent\'s Pass — a narrow cliff path over a lake, avoided because of what lives in it.',
+    'Sokka, who lost Yue, becomes overprotective of Suki to a degree she finds insulting, and she calls him on it; he tells her about Yue properly, and she does not try to fix it.',
+    'Part of the path is submerged, and Katara parts the lake so the party can walk through — which brings the serpent. Aang and Katara fight it off in the water while the others cross.',
+    'On the far side Ying goes into labour and Katara delivers a healthy girl, whom the parents name Hope. The sight of the newborn finally breaks Aang\'s composure; he admits he has been in pain and that he had made himself feel nothing rather than feel that. The group crests the last ridge to see the outer wall of Ba Sing Se — and a Fire Nation drill the size of a town grinding into it.'
+  ],
+
+  '2x13': [
+    'The drill, designed by the Fire Nation war minister and commanded by Azula, is boring through the outer wall of Ba Sing Se, which has never been breached. Aang, Katara, Sokka and Toph join the earthbenders on the wall; direct attacks achieve nothing against its armour.',
+    'Sokka studies the machine and works out that it cannot be beaten from outside: its weakness is structural. The braces holding the frame together must be cut in a specific sequence, and the machine\'s own slurry system — which pumps out the pulverised rock — can be turned against it if the drain is blocked and the pressure allowed to build.',
+    'The group enters through the slurry pipeline. Aang and Toph weaken the braces from inside while Katara plugs the drain and Sokka directs. Mai and Ty Lee sweep the earthbenders off the wall; Ty Lee blocks Aang\'s chi in a fight on top of the drill, briefly leaving him unable to bend at all.',
+    'With the pressure building and the frame compromised, Aang delivers a single earthbending strike to the final brace. The drill splits open along its length and collapses in the trench outside the wall. Azula, Mai and Ty Lee withdraw. Team Avatar enters Ba Sing Se.'
+  ],
+
+  '2x14': [
+    'Inside the walls the group is met by Joo Dee, a cheerful guide with a fixed smile who takes them to a house in the upper ring and deflects every question. They learn the rule that governs the city: within the walls of Ba Sing Se, the war is not mentioned. Not lost, not going badly — not mentioned, by anyone, ever.',
+    'They cannot get an audience with the Earth King, cannot ask openly about Appa, and cannot tell anyone about the eclipse. They crash a palace party in disguise; Katara gets closest to the king before they are intercepted by the Dai Li, the city\'s secret police, who move on walls and ceilings in stone gloves.',
+    'Long Feng, the Grand Secretariat, explains the arrangement over tea: the Earth King is a figurehead who governs nothing, Long Feng runs the city, and the peace inside the walls depends entirely on nobody knowing there is a war outside them. The group may stay and search for their bison, or they may talk about the war, and not both. A new Joo Dee replaces the old one.',
+    'Zuko and Iroh, meanwhile, are living in the lower ring under false names and working in a tea shop, where Iroh is rapidly promoted for improving the tea. Jet, now a refugee in the city, becomes convinced they are firebenders and attacks Zuko in the street with his hook swords. Zuko fights him at length and never once uses fire. The authorities arrest Jet rather than investigate the accusation, and take him under the lake to have it removed from his head.'
+  ],
+
+  '2x15': [
+    'Six short stories set over a single day in Ba Sing Se.',
+    'Katara takes Toph to a spa; Toph enjoys it more than she will admit, and when three girls on a bridge mock her appearance she slides the bridge out from under them, and the two of them laugh about it. Iroh spends his day being kind to strangers with no purpose or profit — calming a crying baby with a song, talking a mugger out of a robbery by critiquing his stance and then buying him tea and asking what he actually wants from life, helping a boy get a ball out of a tree, buying flowers.',
+    'Aang finds the city zoo badly kept and short of space and simply earthbends a new one outside the walls, releasing all the animals in a stampede through the lower ring that he then has to herd. Sokka wanders into a poetry house and holds his own in a haiku battle until he loses on a syllable count and is thrown out. Zuko is asked out by a girl named Jin, and the date is excruciating and oddly sweet; he lights the lanterns at the Firelight Fountain for her with a burst of firebending when her eyes are closed, and then stops her when she kisses him, saying he is confused, and leaves.',
+    'Iroh\'s day ends on a hill above the city, where he lays out the flowers at a small shrine and sings "Leaves from the Vine" to his dead son Lu Ten, telling him he thinks about him every day and wishing him a happy birthday. Momo, meanwhile, searches the city for Appa and finds only a paw print. The episode is dedicated to Mako, the voice of Iroh, who had recently died.'
+  ],
+
+  '2x16': [
+    'The month Appa spent alone, told entirely from his point of view, beginning at the moment the sandbenders muzzle and steal him outside the library.',
+    'He is traded on, muzzled and chained, and passed to a circus, where a trainer breaks him to perform using a whip and fire — leaving him terrified of flame. He escapes and is attacked by a boar-q-pine, and afterwards is found and cared for by the Kyoshi Warriors, who pull out the quills and remove the shackles.',
+    'Azula, Mai and Ty Lee arrive and attack the Kyoshi Warriors. Suki deliberately frightens Appa into the air to save him and stays to fight, and the Kyoshi Warriors are defeated and captured.',
+    'Appa flies on and reaches the Eastern Air Temple, where Guru Pathik — an old man who knew Aang\'s people and has been waiting many years for him — reads him, treats him kindly, and tells him to go to Ba Sing Se. He does. Within a day of arriving he is captured by the Dai Li, and Long Feng, blowing a bison whistle in the dark, has him held under Lake Laogai.'
+  ],
+
+  '2x17': [
+    'Against the rules, the group puts up posters all over Ba Sing Se advertising a lost bison, and Jet finds them. He insists he has been rehabilitated and that he has seen Zuko and Iroh firebending in a tea shop. Katara refuses to trust him, and Toph — who hears heartbeats through the ground — says he is telling the truth, and then, a moment later, that he is also lying. Both.',
+    'Smellerbee and Longshot explain that Jet was taken by the Dai Li. A hypnosis session recovers what was done to him and where: Lake Laogai, and a facility underneath it. The group breaks in and finds rows of cells, brainwashing chambers where recruits are conditioned into identical Joo Dees, and Appa.',
+    'Long Feng arrives with Dai Li agents and triggers Jet with a code phrase, forcing him to attack Aang. Jet breaks the conditioning and turns on Long Feng, who mortally wounds him with a rock. Jet tells the others to go, insisting he will be fine; Toph, who can tell, says nothing.',
+    'In parallel, Zuko puts on the Blue Spirit mask and goes to steal Appa himself. Iroh follows him and refuses to let it happen unexamined, asking the two questions he has never asked directly: who are you, and what do you want. Zuko has no answer. He opens the cage and lets Appa go, then removes the mask and drops it into Lake Laogai. The group escapes with the bison.'
+  ],
+
+  '2x18': [
+    'Having exhausted every proper channel, the group flies Appa straight into the royal palace and confronts the Earth King in person. He does not believe there is a war until Aang points out that the bite marks on Long Feng\'s leg match Appa\'s teeth, and then agrees to be shown.',
+    'Taken to the outer wall, the king sees the wreck of the Fire Nation drill embedded in it. Long Feng attempts to pass it off as a construction project and Katara points out the Fire Nation insignia. The king orders his arrest, and the Dai Li bind their own Grand Secretariat in metal manacles.',
+    'A raid on Long Feng\'s office recovers files kept on the city\'s residents, including a letter from Guru Pathik about teaching Aang to control the Avatar State, a message from Toph\'s mother saying she is in the city, and intelligence on Southern Water Tribe warriors led by Hakoda at Chameleon Bay. The Council of Five begins planning an invasion of the Fire Nation on the day of the eclipse.',
+    'The group splits up: Aang flies Sokka to Chameleon Bay to find his father and then goes on to the Eastern Air Temple, Toph leaves to meet her mother, and Katara stays to advise the king. Zuko, meanwhile, has collapsed with a fever after freeing Appa; Iroh nurses him and tells him it is not illness but a metamorphosis, and that the person who emerges will be different. He wakes calm, and the two of them are given a tea shop of their own in the upper ring. In the final seconds of the episode, three Kyoshi Warriors arrive to protect the palace and are welcomed — Azula, Mai and Ty Lee.'
+  ],
+
+  '2x19': [
+    'At the Eastern Air Temple, Guru Pathik offers to teach Aang to enter and control the Avatar State at will. The method is to open seven chakras, each blocked by something he must confront: guilt over the Air Nomads, shame at burning Katara, grief for Appa, fear of his own power. Aang works through six of them.',
+    'The seventh chakra is attachment, and Pathik is explicit that pure cosmic energy cannot flow through someone still clinging to an earthly attachment. Aang\'s attachment is Katara, and he is asked to let her go — not abandon her, but release the grip. Mid-meditation he senses her in danger, opens his eyes, and Pathik warns that if he leaves now the chakra will lock and he will lose access to the Avatar State altogether. He leaves.',
+    'Toph\'s letter was bait: Xin Fu and Master Yu capture her in a sealed metal box with no earth to bend and begin carting her back to Gaoling. Alone in the dark she works out that metal is refined earth and still contains traces of it, feels for them, and bends her way out through the wall of the box — inventing metalbending, which no earthbender in history has managed.',
+    'Sokka finds his father at Chameleon Bay and helps build weapons with the fleet. In Ba Sing Se, Iroh and Zuko open the Jasmine Dragon in the upper ring and Iroh declares it the best day of his life. Katara recognises Zuko through the shop window and runs to warn the Earth King — straight into the throne room, where the Kyoshi Warriors are Azula, Mai and Ty Lee. Ty Lee blocks her chi in seconds.'
+  ],
+
+  '2x20': [
+    'Azula recruits Long Feng, offering to help him retake the city; he accepts, intending to use her, while she takes control of the Dai Li out from under him. Katara is imprisoned in the crystal catacombs beneath Ba Sing Se, and Zuko is brought down and chained in the same cave.',
+    'The two of them talk. Katara begins by throwing his scar at him as something he deserved, and Zuko says quietly that it was not something that happened to him but something he was given, by his father — and that his mother is gone too. Katara, moved, offers to heal the scar with the vial of Spirit Oasis water she has carried all season. Before she can, Aang and Iroh break through the wall.',
+    'Azula offers Zuko a deal: come home restored, an honoured prince, with their father\'s forgiveness — she will tell Ozai that Zuko killed the Avatar — and all he has to do is stand with her. Iroh tells his nephew he is proud of him, that he knows he has struggled, and that this is the moment to look inside his own heart and decide. Zuko chooses Azula and joins the fight against Aang.',
+    'Aang, cornered, sits down mid-battle and forces the last chakra open by will, entering the Avatar State inside a shell of crystal. Azula waits for the moment and shoots him in the back with lightning. Katara catches his body, drives Azula off with a wave, and spends the entire vial of spirit water on him — and he lives. Iroh holds off the Dai Li so they can escape. Ba Sing Se falls; the Earth King, Toph, Sokka and the others withdraw on Appa. Iroh is taken prisoner, and Azula tells her brother that he restored his own honour.'
+  ]
+});
+
+</script>
+<script>
+/* =========================================================================
+   Full plot synopses — Book Three: Fire.
+   ========================================================================= */
+
+window.ATLA = window.ATLA || {};
+window.ATLA.synopsis = window.ATLA.synopsis || {};
+
+Object.assign(window.ATLA.synopsis, {
+
+  '3x01': [
+    'Aang wakes three weeks after Ba Sing Se aboard a captured Fire Nation ship, his head shaved and healing, with no memory of the time. Katara has been keeping him alive. The fleet — Hakoda, Bato, the Earth King and the remnants of the Water Tribe force — is sailing into Fire Nation waters in disguise, and the world has been told the Avatar is dead, which is tactically useful.',
+    'Aang cannot accept it. Told that the Earth Kingdom has fallen and that he failed, he takes his glider and flies off into a storm at night, is thrown into the sea, and has visions of Roku and Yue telling him to keep going. He washes up on Crescent Island, at the ruin of Roku\'s temple.',
+    'His friends find him there. Aang agrees to stay officially dead and to hide until the invasion, and burns his glider so that nothing can identify him — the last object he still had from the Air Temples.',
+    'Meanwhile Zuko has come home to a hero\'s welcome: his banishment lifted, his rooms restored, the nation told he killed the Avatar. He cannot sleep. He visits Iroh in prison to explain himself and Iroh turns his back and refuses to speak to him. Azula tells Zuko, lightly, that she told their father the kill was his — a gift — and that if the Avatar turns out to be alive, it is Zuko who lied to the Fire Lord.'
+  ],
+
+  '3x02': [
+    'Hiding in the Fire Nation, the group buys local clothes to blend in, and Aang — mistaken for a truant — is enrolled at a Fire Nation school. He gives his name as Kuzon and, to the others\' alarm, keeps going back, arguing that learning the culture is useful and quietly enjoying being an ordinary child.',
+    'He gets into trouble for correcting the official history and for dancing, which the school forbids. Katara and Sokka attend a parent-teacher conference in disguise as Sapphire Fire and Wang Fire.',
+    'Aang organises a secret dance party in a cave outside town and teaches the students steps from all four nations; he and Katara dance together in front of everyone. When the headmaster raids the cave, the students all put on Aang\'s headband so he cannot be identified, and he escapes in the crowd.',
+    'Zuko visits Iroh in prison twice more and is met with silence both times; the second time he throws the food at the wall. He and Mai spend an afternoon together. At the end of the episode Zuko goes into the lower city and hires an assassin — a huge man with a metal arm and leg and a tattooed third eye on his forehead — to find and kill the Avatar.'
+  ],
+
+  '3x03': [
+    'The group stops at Jang Hui, a poor Fire Nation river village that is starving and sick because a Fire Nation factory upstream is dumping waste into the water. Sokka, working to a schedule built backwards from the eclipse, insists they cannot afford to stop.',
+    'Katara stops anyway. She delays the group by faking an illness in Appa, and at night disguises herself as the Painted Lady, a river spirit the villagers pray to, delivering food and healing the sick. Aang works out what she is doing and joins her without being asked.',
+    'Together they destroy the factory. The villagers, initially delighted, turn on Katara when Fire Nation soldiers arrive and her disguise is exposed as a fraud. Sokka — who was right about the schedule — is the one who defends her, pointing out that the factory is gone, the soldiers have been driven off, and the river will run clean.',
+    'The village and the group clean the river together. As they leave, the actual Painted Lady appears to Katara on the water and thanks her.'
+  ],
+
+  '3x04': [
+    'After watching Aang, Katara and Toph resolve a crisis with three kinds of bending in seconds while he holds the bags, Sokka decides he needs to be more than the group\'s planner and goes looking for a teacher.',
+    'He finds Master Piandao, the finest swordsman in the Fire Nation, and talks his way into an apprenticeship under a false name. Piandao\'s training is not what he expects: calligraphy, painting, rock gardening, and lessons about creativity and observation rather than fighting, on the principle that the sword is an extension of the self.',
+    'A meteorite falls near the estate and Piandao has Sokka forge his own blade from it — a black sword of meteoric metal.',
+    'Piandao then attacks him, revealing he knew Sokka was Water Tribe from the first day. Sokka holds him off before losing, and Piandao explains that he taught him anyway because the art belongs to no nation and because Sokka was the most dedicated student he had ever had. As Sokka leaves, Piandao\'s butler gives him a white lotus Pai Sho tile.'
+  ],
+
+  '3x05': [
+    'Two parallel stories. Azula, Zuko, Mai and Ty Lee are sent to Ember Island for a holiday, and turn out to be conspicuously bad at ordinary life. Azula cannot flirt, cannot read a room, and asks Ty Lee to coach her; her attempt comes out as a threat. Zuko is jealous and sullen, throws a vase through a wall over a boy talking to Mai, and gets them ejected from a party. Mai tells him he is exhausting and has no idea what he wants.',
+    'They end up at a bonfire on the beach, where each of them says something true. Ty Lee joined the circus because she was one of six identical sisters and needed to be seen as herself. Mai was raised by ambitious parents to be silent and decorative. Zuko says he is angry all the time and no longer knows the difference between right and wrong, and that he is angry at himself. Azula says her mother thought she was a monster — and that she was right, and that it still hurt.',
+    'Meanwhile the assassin Zuko hired tracks Team Avatar and attacks from long range with explosive blasts detonated by focusing through the tattoo on his forehead. He does not close to fight; he takes the ground apart from a distance.',
+    'The group spends the episode running and hiding, and eventually escapes. Sokka begins working out that the man needs a clear line of sight and a moment to aim.'
+  ],
+
+  '3x06': [
+    'On the anniversary of the day he was born, Aang has a vision and asks Roku how the war began. Roku tells him the whole story: he and Fire Lord Sozin were best friends, born on the same day, and Sozin gave him a crown piece at his wedding. When Roku discovered that Sozin had begun annexing other nations to build an empire, he confronted him, defeated him, and let him live because they were friends.',
+    'Twenty-five years later the volcano on Roku\'s island erupted. Sozin came to help and then, halfway through the rescue, left him to die, because a dead Avatar meant a hundred years in which the next one would be a child. Aang was born the same day. Sozin spent the rest of his life hunting the Air Nomads and never found the new Avatar.',
+    'Roku tells Aang that he was wrong to spare Sozin, that his mercy allowed everything that followed, and that Aang must be decisive where he was not.',
+    'In parallel, Zuko follows what he believes is a message from Iroh into the Fire Sages\' catacombs and finds Sozin\'s final testament. Iroh finally breaks his silence to give him the missing half: Avatar Roku was Zuko\'s mother\'s grandfather. Zuko is descended from both men — from the Fire Lord who started the war and the Avatar who failed to stop it — and Iroh tells him that the conflict in him is the same conflict, and that he is uniquely placed to end it.'
+  ],
+
+  '3x07': [
+    'Toph discovers she can win money at street games by earthbending the outcome, and starts running scams in Fire Nation towns with Sokka and Aang. Katara disapproves; Toph tells her to stop acting like her mother, and the fight escalates until they are barely speaking.',
+    'A wanted poster appears calling Toph "the Runaway", with a large bounty. Sokka finds it and hides it from Katara, who finds it anyway, deepening the rift. Sokka takes Toph aside and explains what she has not understood: Katara had a mother and lost her, and became one for everybody else because there was nobody else to do it.',
+    'Katara proposes a truce in the form of one last scam — turning Toph in for the bounty and escaping with the money. It is hijacked by the assassin, whom they nickname Combustion Man, and the two girls are locked in a wooden cell as bait for Aang.',
+    'Katara escapes by bending her own perspiration to pick the lock. In the fight that follows they work out that the tattoo on his forehead is both his weapon and his weak point: a well-aimed hit disrupts the blast and injures him, and he retreats. Afterwards Toph writes a letter to her parents and sends it by messenger hawk.'
+  ],
+
+  '3x08': [
+    'The group stops at a Fire Nation village where people have been disappearing on nights of the full moon, and takes rooms at an inn run by a kindly old woman named Hama. Hama recognises Katara as a waterbender and reveals that she is one too — the last waterbender taken from the Southern Water Tribe in the raids, captured decades ago and held in a Fire Nation prison. She begins teaching Katara techniques from their shared tribe, including drawing water out of plants and, in extremity, out of living things.',
+    'Sokka and Aang investigate the disappearances and find a mountain cave full of the missing villagers, imprisoned and chained.',
+    'Hama explains how she escaped. Denied water, she spent years studying the water inside living bodies and learned to control it, practising on rats until she could bend a person — bloodbending, possible only under a full moon. She has been using it on villagers ever since as revenge for what was done to her.',
+    'Katara refuses to learn it. Hama bloodbends Aang and Sokka and forces them to fight each other, and the only way Katara can stop it is to bloodbend Hama herself. She wins, the villagers are freed, and Hama is taken away laughing, delighted that Katara now has the technique and cannot give it back. Katara is left in tears.'
+  ],
+
+  '3x09': [
+    'With four days until the invasion, Aang stops sleeping. His nightmares are not about dying but about being unprepared — arriving late, being caught without his clothes, failing a test, losing to Ozai because he did not do the work.',
+    'The others try everything. Katara runs him through yoga and pressure points; Toph gives him a violent massage and acupuncture; Sokka puts on a false beard and attempts therapy. Nothing works, and after three days without sleep Aang is hallucinating: talking melons, an imagined kiss with Katara, a full-scale delusion in which Momo and Appa duel in a coliseum.',
+    'In parallel, Zuko is invited to his father\'s war meeting for the first time. He performs perfectly, says what the room wants, and is praised for it — and tells Mai afterwards that it frightened him how easily it came.',
+    'Aang eventually sleeps, and wakes clear-headed and calm on the eve of the invasion. Zuko practises a speech to his father in a mirror.'
+  ],
+
+  '3x10': [
+    'The invasion force arrives at the Black Cliffs: everyone Team Avatar has helped over three seasons, brought by Hakoda\'s fleet in submarines designed with the Mechanist. Haru, Tyro and the earthbenders from the prison rig; Teo and the Mechanist; Pipsqueak and the Duke from the Freedom Fighters; Bato and the Water Tribe warriors; Due and Tho from the swamp.',
+    'Sokka is meant to brief them and freezes; his father takes over, and Sokka manages it properly on the second attempt. Before they launch, Aang kisses Katara on the beach and flies off before she can answer.',
+    'The eclipse arrives exactly on schedule. The submarines breach the harbour, the earthbenders take the beach, and the invasion moves up through the city toward the palace as the sun goes out and every Fire Nation firebender loses their bending for eight minutes.',
+    'Aang blows the doors off the throne room — and it is empty. Ozai is not there, and neither is anyone else. Someone told them the invasion was coming, months ago.'
+  ],
+
+  '3x11': [
+    'With the eclipse already running, Toph finds a secret bunker under a mountain and opens its sealed metal door with metalbending. Inside, alone and powerless, is Azula. She is in no danger and does not fight; she stalls, taunting Sokka about Suki\'s capture and revealing that she has known about the invasion for months, and burns the entire eclipse doing it.',
+    'Elsewhere in the bunker, Zuko walks into his father\'s chamber and tells him everything: that the war is wrong, that the Fire Nation has spread only pain, that the honour he was sent to earn was never real, and that Iroh has been more of a father to him than Ozai ever was. He announces that he is leaving to join the Avatar and teach him firebending. Ozai stalls him with talk of Ursa — telling him she may still be alive and was banished for what she did the night Azulon died — until the sun returns, and then attacks him with lightning. Zuko redirects it into the ceiling and escapes on a stolen war balloon.',
+    'The eclipse ends, Fire Nation airships rise over the city, and the invasion collapses. The submarines have been destroyed.',
+    'The adults surrender so that the children can escape: Hakoda, Bato, the Mechanist, Tyro and the rest stay behind and are taken prisoner. Aang, Katara, Sokka, Toph, Teo, Haru and the Duke fly out on Appa and head for the Western Air Temple.'
+  ],
+
+  '3x12': [
+    'At the Western Air Temple — an inverted complex hanging beneath a cliff — the group takes stock after the failed invasion. Zuko arrives having rehearsed an introduction, tries it three ways in private, and delivers it badly: he says he has changed, that he wants to teach Aang firebending, and that he is sorry.',
+    'Everyone refuses. Katara is the most direct, listing what he has done, including that in Ba Sing Se she was the first to trust him and he betrayed it. Zuko admits he also hired the assassin currently hunting them, which does not help.',
+    'Combustion Man attacks the temple. Zuko fights him alone, taking hits and buying time, until Sokka throws his boomerang and strikes the tattoo on his forehead, disrupting the chakra so that his next blast detonates inside him. He falls into the canyon.',
+    'Aang accepts Zuko as his firebending teacher and the others reluctantly agree. That night Zuko mistakes Toph for an intruder and firebends by reflex, burning the soles of her feet — her means of sight — badly. Later, in private, Katara tells him that if he makes one move toward Aang she will kill him.'
+  ],
+
+  '3x13': [
+    'Zuko\'s first lesson is a failure: his firebending has become weak and unreliable, and the burst he does produce is what injured Toph. He assumes he needs more rage. Iroh once told him the technique he learned draws on hate, and now that the hate is gone, the fire has gone with it.',
+    'Zuko and Aang set out to find the original source of firebending, following clues to the ruins of the Sun Warrior civilisation. Aang is deeply reluctant; he has not firebent since burning Katara\'s hands two seasons earlier.',
+    'They find the city still inhabited. The Sun Warriors are not extinct, and they set the two of them a test: to carry a piece of the eternal flame — the original fire, which must be kept alive rather than thrown — up the mountain between them, each holding half.',
+    'At the top they meet Ran and Shaw, the last two dragons, whom the Fire Nation believed extinct because Fire Lords hunted them for the title of Dragon. The dragons do not attack; they perform the ancient dancing dragon form, and show the two boys what fire actually is — not a weapon but energy and life, the same as breath. Zuko\'s firebending returns, sourced differently, and Aang firebends without fear for the first time. It also emerges that Iroh never killed the last dragon: he found them, was spared, and lied to protect them.'
+  ],
+
+  '3x14': [
+    'Sokka, carrying the failure of the invasion and the capture of his father, learns from Zuko about the Boiling Rock — a maximum-security Fire Nation prison on an island in the middle of a boiling lake, from which nobody has ever escaped. He decides to break in and get Hakoda out. Zuko volunteers to come, since he knows how the system works and can pass inside it.',
+    'They take the stolen war balloon, have a stilted conversation about the girls they have lost, and crash-land on the volcano rim when the steam kills their lift. They steal guard uniforms and infiltrate the prison, and discover there are no Water Tribe prisoners held there.',
+    'Sokka finds Suki, captured after the Kyoshi Warriors were defeated. To keep his cover when a guard approaches, he arrests Zuko; the warden — who turns out to be Mai\'s uncle — interrogates him but does not expose him.',
+    'Sokka works out an escape: the prison\'s cooler, a detachable insulated cell, could float across the lake. Zuko deliberately gets himself sent to solitary confinement and works the cooler loose. Then Sokka overhears that a new batch of war prisoners arrives tomorrow and calls off the attempt. Another prisoner, Chit Sang, uses the cooler instead and is caught. The gondola arrives — and Hakoda is on it.'
+  ],
+
+  '3x15': [
+    'Sokka and Hakoda are reunited, and Sokka lays out a new plan: take the warden hostage, use the gondola, and go over the lake. To create cover, Chit Sang starts a riot in the yard.',
+    'The plan runs. Suki takes the warden hostage, and the group boards the gondola with him and starts across the cable over the boiling water. The warden orders the line cut regardless.',
+    'Azula, Mai and Ty Lee arrive. Azula and Ty Lee board the cable and attack, and the guards begin cutting the line — and then Mai, at the platform end, defeats the guards and stops them, letting the gondola reach the far side.',
+    'Azula demands to know how she could betray her, and Mai answers that she loves Zuko more than she fears Azula. Azula moves to kill her, and Ty Lee blocks Azula\'s chi from behind, dropping her. Both girls are arrested on Azula\'s order. Sokka, Suki, Zuko, Hakoda and Chit Sang escape in Azula\'s airship and return to the Western Air Temple, where Katara runs into her father\'s arms.'
+  ],
+
+  '3x16': [
+    'Zuko is now accepted by everyone except Katara, who remains openly cold. When he asks what he can do, she tells him he could bring her mother back.',
+    'Sokka gives Zuko the detail he remembers from the day: the raiders flew the flag of the Southern Raiders. Zuko traces the unit and its retired commander, Yon Rha, and offers to take Katara to him. Aang argues against it, comparing revenge to a two-headed rat viper and urging forgiveness; Katara tells him it is easy to say that when it was not your mother. Aang tells her to choose forgiveness rather than revenge, and lets her go.',
+    'Katara and Zuko take Appa. Katara recounts what happened: when she was eight the Southern Raiders came looking for the last waterbender in the tribe, and her mother told them it was her — to protect Katara, who it actually was — and was killed for it. Katara found the body.',
+    'They find Yon Rha retired, gardening, and complaining about his elderly mother — an ordinary, frightened old man. Katara bloodbends him, the only time she ever uses it by choice, holds a suspended shell of rain as icicles over him, and then stops. She tells him he is pathetic and empty and not worth it, and leaves him alive. Back at the temple Aang says he is proud she forgave him; Katara corrects him — she did not forgive Yon Rha and never will. She forgave Zuko.'
+  ],
+
+  '3x17': [
+    'Hiding out on Ember Island in the abandoned Fire Nation royal family beach house, the group goes to see a play about themselves: The Boy in the Iceberg, staged by the Ember Island Players from Fire Nation accounts of their travels.',
+    'The play is a propaganda piece and a bad one. Aang is played by a woman and portrayed as a giggling child who runs from everything; Katara is a weeping hysteric who makes speeches about hope; Sokka is a buffoon who thinks only about food; Toph is an enormous shouting man; Zuko screams about honour with the scar on the wrong side; Iroh is a gluttonous fool. Each of them is separately, quietly humiliated.',
+    'During the interval Aang takes Katara onto the balcony and asks what they are, referring to the kiss before the invasion. She says she is confused and that there is a war on and now is not the time, and he kisses her anyway; she walks back inside and he is left alone.',
+    'The third act restages Ba Sing Se and then invents an ending: the Fire Lord kills the Avatar, and Zuko is killed by Azula for good measure. The Fire Nation audience gives it a standing ovation. The group walks out into the night, two days from the comet.'
+  ],
+
+  '3x18': [
+    'With the comet three days away, Aang is told he must kill Fire Lord Ozai. Zuko, Sokka and Toph all say it plainly; they stage a mock battle with a melon on a stick to prove he can strike the killing blow, and he cannot. Aang argues that he was raised by monks who taught that all life is sacred, and gets no support from anyone in the group.',
+    'Zuko tells them what he learned at the war meeting: Ozai intends to use the comet to burn the entire Earth Kingdom to the ground, the way Sozin burned the Air Nomads. That raises the stakes and does not change Aang\'s answer.',
+    'Aang walks out to the beach alone to think, and in the morning he is gone. There is no sign of him and no trace.',
+    'In the Fire Nation capital, Ozai holds a ceremony declaring himself Phoenix King, ruler of the world, and hands the Fire Nation throne to Azula. He is not taking her with him on the comet strike. She thanks him and understands exactly what has happened, and it visibly lands as an abandonment.'
+  ],
+
+  '3x19': [
+    'Aang wakes on an island that has appeared in the middle of the ocean. It is a lion turtle — an immense ancient creature from the era before the Avatar, before humans learned bending from badgermoles, dragons and the moon. It carries him toward the Fire Nation while he asks it how to defeat Ozai without killing him. It tells him that in the era before bending, people bent the energy within themselves, that the true mind must be victorious over the true heart, and that a bender\'s energy can only be bent by someone whose own spirit is unbendable — and then places a claw on his forehead and gives him the knowledge.',
+    'The others go looking for him. Zuko hires June and her shirshu, who cannot find Aang because, as she puts it, he does not exist. Zuko gives her Iroh\'s sandal instead and the shirshu takes them to Ba Sing Se.',
+    'Outside the city they find a camp of old men: Bumi, Jeong Jeong, Pakku and Piandao — the Order of the White Lotus, a secret society spanning all four nations, of which Iroh is Grand Lotus. Sokka realises the tile he was given was a membership token; Pakku reveals he has married Kanna and greets Katara as his granddaughter.',
+    'Zuko apologises to his uncle without rehearsing it and Iroh embraces him before he finishes, saying he was never angry, only sad, because he thought Zuko had lost his way. Iroh refuses to fight Ozai: history would record it as a brother killing a brother for a throne, and it must be the Avatar. He assigns the tasks — the White Lotus will retake Ba Sing Se, Zuko and Katara will face Azula, and Sokka, Toph and Suki will stop the airship fleet.'
+  ],
+
+  '3x20': [
+    'Sozin\'s Comet arrives and the sky turns red. Azula\'s coronation proceeds in an empty courtyard while she comes apart: she banishes her servants for imagined slights, dismisses the Dai Li, cannot tell her advisors Lo and Li apart and exiles them, and argues with a vision of her mother in the mirror, who tells her she loves her.',
+    'Zuko and Katara arrive and Zuko challenges Azula to an Agni Kai for the throne, one on one, keeping Katara out of it. Azula accepts. The duel is fierce and Zuko is winning — Azula\'s fire is wild and undisciplined and she cannot hold a line.',
+    'Unable to beat him, Azula turns and fires lightning at Katara instead. Zuko has no time to take position; he throws himself into the path of the bolt and attempts to redirect it, and it goes through his heart. He collapses on the flagstones, badly wounded, and Katara is left alone against Azula.',
+    'Elsewhere, Sokka, Toph and Suki seize a Fire Nation airship and use it to ram the fleet, bringing warships down one at a time. And Aang finds Ozai. Under the comet, Ozai is overwhelmingly powerful and hunts him across the landscape; Aang defends, evades and refuses to kill, and when Ozai throws lightning at him Aang catches it and, at the last instant, redirects it into the sky rather than into his father\'s chest, giving up his one clean win. The episode ends with Ozai advancing on him.'
+  ],
+
+  '3x21': [
+    'Ozai slams Aang against a jagged outcrop of rock, which strikes the exact point on his spine where the seventh chakra was left blocked. It opens, and the Avatar State returns in full for the first time since Azula killed him. Aang overpowers Ozai instantly, pins him, and then — with every previous Avatar telling him to finish it — pulls out of the Avatar State and puts his hands on him instead.',
+    'He energybends: taking Ozai\'s firebending out of him at the source. Ozai\'s energy nearly turns his and Aang almost loses himself, and his own spirit holds. The most powerful firebender in history is left alive and permanently unable to bend.',
+    'Katara defeats Azula by baiting her onto a drain grate, freezing them both into the water, thawing one hand and chaining Azula\'s wrist to the metal. She then heals Zuko, whose wound would have killed him. Azula, chained on the ground, breathes fire at nothing and then breaks down screaming and weeping while her brother watches in silence.',
+    'Sokka and Toph bring down the last of the airship fleet, and are saved by Suki, who catches their falling ship with another. The Order of the White Lotus liberates Ba Sing Se, and Iroh takes the wall he failed to breach twenty years earlier.',
+    'Zuko is crowned Fire Lord, declares the hundred-year war over, and commits the Fire Nation to rebuilding what it destroyed; he offers the throne to Iroh first, who refuses it. He visits Ozai in prison to demand to know where his mother is. The series ends at the Jasmine Dragon in Ba Sing Se, with Iroh pouring tea, Sokka painting a bad group portrait, and Aang and Katara stepping outside onto the balcony to kiss.'
+  ]
+});
 
 </script>
 <script>
@@ -4872,6 +5629,9 @@ Object.assign(window.ATLA.pov.azula, {
 
   var state = { charId: CHARS[0].id, epIdx: 1 };
 
+  /* the synopsis disclosure stays open across episode changes once opened */
+  var synopsisOpen = false;
+
   function char() {
     return CHARS.filter(function (c) { return c.id === state.charId; })[0] || CHARS[0];
   }
@@ -4931,6 +5691,19 @@ Object.assign(window.ATLA.pov.azula, {
     }
 
     document.getElementById('brandMark').innerHTML = svg(bend[0].el, primary.glow);
+
+    /* background portrait, tinted to whatever this character currently bends */
+    var port = document.getElementById('portrait');
+    if (c.portraitSrc) {
+      port.innerHTML = '<img src="' + c.portraitSrc + '" alt="">';
+    } else {
+      port.innerHTML = '<svg viewBox="0 0 200 240" style="color:' + primary.glow + '" ' +
+        'xmlns="http://www.w3.org/2000/svg">' +
+        (D.PORTRAITS[c.id] || '') + '</svg>';
+    }
+    port.classList.remove('swap-in');
+    void port.offsetWidth;
+    port.classList.add('swap-in');
   }
 
   function weightFor(state) {
@@ -4990,8 +5763,13 @@ Object.assign(window.ATLA.pov.azula, {
       t.setAttribute('role', 'tab');
       t.setAttribute('aria-selected', ep().book === bk.id ? 'true' : 'false');
       t.disabled = !!bk.locked;
-      t.innerHTML = '<b>' + bk.name + '</b><i>' +
-        (bk.locked ? 'soon' : bk.subtitle) + '</i>';
+      var bpal = EL[bk.element] || EL.water;
+      t.style.setProperty('--book', bpal.core);
+      t.style.setProperty('--book-glow', bpal.glow);
+      t.innerHTML =
+        '<span class="book-sigil">' + svg(bk.element, bpal.ink) + '</span>' +
+        '<span class="book-text"><b>' + (bk.short || bk.name) + '</b><i>' +
+        (bk.locked ? 'soon' : bk.subtitle) + '</i></span>';
       if (!bk.locked) {
         t.addEventListener('click', function () { go(state.charId, epsForBook(bk.id)[0].idx); });
       }
@@ -5033,6 +5811,20 @@ Object.assign(window.ATLA.pov.azula, {
     document.getElementById('epNum').textContent = 'Chapter ' + e.num;
     document.getElementById('epTitle').textContent = e.title;
     document.getElementById('epLogline').textContent = e.logline;
+
+    /* full plot synopsis — collapsed unless the reader has opened it */
+    var syn = D.synopsis[e.id];
+    var det = document.getElementById('synopsis');
+    var body = document.getElementById('synopsisBody');
+    if (syn) {
+      det.hidden = false;
+      det.open = synopsisOpen;
+      body.innerHTML = paras(syn);
+    } else {
+      det.hidden = true;
+      det.open = false;
+      body.innerHTML = '';
+    }
 
     document.getElementById('whoName').textContent = c.name;
     document.getElementById('whoEpithet').textContent = c.epithet + ' · ' + c.house;
@@ -5162,6 +5954,10 @@ Object.assign(window.ATLA.pov.azula, {
     } else if (/^[1-9]$/.test(evt.key) && CHARS[+evt.key - 1]) {
       evt.preventDefault(); go(CHARS[+evt.key - 1].id, state.epIdx);
     }
+  });
+
+  document.getElementById('synopsis').addEventListener('toggle', function () {
+    synopsisOpen = this.open;
   });
 
   window.addEventListener('hashchange', function () { readHash(); render(); });

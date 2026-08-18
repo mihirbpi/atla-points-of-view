@@ -127,6 +127,9 @@
 
   var state = { charId: CHARS[0].id, epIdx: 1 };
 
+  /* the synopsis disclosure stays open across episode changes once opened */
+  var synopsisOpen = false;
+
   function char() {
     return CHARS.filter(function (c) { return c.id === state.charId; })[0] || CHARS[0];
   }
@@ -186,6 +189,19 @@
     }
 
     document.getElementById('brandMark').innerHTML = svg(bend[0].el, primary.glow);
+
+    /* background portrait, tinted to whatever this character currently bends */
+    var port = document.getElementById('portrait');
+    if (c.portraitSrc) {
+      port.innerHTML = '<img src="' + c.portraitSrc + '" alt="">';
+    } else {
+      port.innerHTML = '<svg viewBox="0 0 200 240" style="color:' + primary.glow + '" ' +
+        'xmlns="http://www.w3.org/2000/svg">' +
+        (D.PORTRAITS[c.id] || '') + '</svg>';
+    }
+    port.classList.remove('swap-in');
+    void port.offsetWidth;
+    port.classList.add('swap-in');
   }
 
   function weightFor(state) {
@@ -245,8 +261,13 @@
       t.setAttribute('role', 'tab');
       t.setAttribute('aria-selected', ep().book === bk.id ? 'true' : 'false');
       t.disabled = !!bk.locked;
-      t.innerHTML = '<b>' + bk.name + '</b><i>' +
-        (bk.locked ? 'soon' : bk.subtitle) + '</i>';
+      var bpal = EL[bk.element] || EL.water;
+      t.style.setProperty('--book', bpal.core);
+      t.style.setProperty('--book-glow', bpal.glow);
+      t.innerHTML =
+        '<span class="book-sigil">' + svg(bk.element, bpal.ink) + '</span>' +
+        '<span class="book-text"><b>' + (bk.short || bk.name) + '</b><i>' +
+        (bk.locked ? 'soon' : bk.subtitle) + '</i></span>';
       if (!bk.locked) {
         t.addEventListener('click', function () { go(state.charId, epsForBook(bk.id)[0].idx); });
       }
@@ -288,6 +309,20 @@
     document.getElementById('epNum').textContent = 'Chapter ' + e.num;
     document.getElementById('epTitle').textContent = e.title;
     document.getElementById('epLogline').textContent = e.logline;
+
+    /* full plot synopsis — collapsed unless the reader has opened it */
+    var syn = D.synopsis[e.id];
+    var det = document.getElementById('synopsis');
+    var body = document.getElementById('synopsisBody');
+    if (syn) {
+      det.hidden = false;
+      det.open = synopsisOpen;
+      body.innerHTML = paras(syn);
+    } else {
+      det.hidden = true;
+      det.open = false;
+      body.innerHTML = '';
+    }
 
     document.getElementById('whoName').textContent = c.name;
     document.getElementById('whoEpithet').textContent = c.epithet + ' · ' + c.house;
@@ -417,6 +452,10 @@
     } else if (/^[1-9]$/.test(evt.key) && CHARS[+evt.key - 1]) {
       evt.preventDefault(); go(CHARS[+evt.key - 1].id, state.epIdx);
     }
+  });
+
+  document.getElementById('synopsis').addEventListener('toggle', function () {
+    synopsisOpen = this.open;
   });
 
   window.addEventListener('hashchange', function () { readHash(); render(); });

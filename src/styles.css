@@ -129,6 +129,48 @@ body {
   .sigil, .ambient-wash, body, .card { transition-duration: 1ms !important; }
 }
 
+/* ---- background portrait ----------------------------------------------- */
+
+.portrait {
+  position: fixed;
+  /* sized so the whole head clears the top edge of the reading panel
+     (~200px) rather than being cut in half by it */
+  top: 0;
+  left: 50%;
+  width: min(26vw, 250px);
+  transform: translateX(-50%);
+  z-index: 1;
+  pointer-events: none;
+  opacity: .34;
+  /* stacked drop-shadows compound into a real dark halo, so the pale figure
+     reads against the bright corners of the warm themes (Aang, Iroh) as well
+     as against the dark ones */
+  filter: drop-shadow(0 0 1px rgba(0,0,0,.9))
+          drop-shadow(0 0 1px rgba(0,0,0,.9))
+          drop-shadow(0 0 3px rgba(0,0,0,.8))
+          drop-shadow(0 10px 34px rgba(0,0,0,.6));
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 0%, #000 68%, transparent 96%);
+  mask-image: linear-gradient(to bottom,
+    #000 0%, #000 68%, transparent 96%);
+  transition: opacity 900ms var(--ease);
+}
+.portrait svg, .portrait img { width: 100%; height: auto; display: block; }
+.portrait img { filter: saturate(.8); }
+
+.portrait.swap-in { animation: portrait-in 900ms var(--ease); }
+@keyframes portrait-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(14px) scale(.97); }
+  to   { opacity: .34; transform: translateX(-50%); }
+}
+
+@media (max-width: 900px) {
+  .portrait { width: 40vw; opacity: .14; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portrait.swap-in { animation: none; }
+}
+
 /* ---- masthead ---------------------------------------------------------- */
 
 .masthead {
@@ -267,31 +309,56 @@ body {
 
 .book-tab {
   flex: 1;
-  padding: 9px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 5px;
   border-radius: 10px;
-  border: 1px solid rgba(255,255,255,.13);
-  background: rgba(255,255,255,.04);
+  border: 1px solid color-mix(in srgb, var(--book) 40%, transparent);
+  background: color-mix(in srgb, var(--book) 12%, transparent);
   color: inherit;
   font: inherit;
   font-size: 12px;
   letter-spacing: .08em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: background 220ms var(--ease);
+  transition: background 240ms var(--ease), border-color 240ms var(--ease),
+              box-shadow 240ms var(--ease), transform 240ms var(--ease);
 }
-.book-tab:hover:not(:disabled) { background: rgba(255,255,255,.1); }
+.book-tab:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--book) 26%, transparent);
+  transform: translateY(-1px);
+}
 .book-tab[aria-selected="true"] {
-  background: color-mix(in srgb, var(--core) 34%, rgba(255,255,255,.05));
-  border-color: color-mix(in srgb, var(--glow) 42%, transparent);
+  background: color-mix(in srgb, var(--book) 46%, transparent);
+  border-color: color-mix(in srgb, var(--book-glow) 62%, transparent);
+  box-shadow: 0 6px 22px -12px var(--book), 0 0 0 1px rgba(255,255,255,.06) inset;
 }
 .book-tab:disabled { opacity: .34; cursor: not-allowed; }
+.book-tab:focus-visible { outline: 2px solid var(--book-glow); outline-offset: 2px; }
+
+.book-sigil {
+  width: 17px; height: 17px;
+  flex: 0 0 auto;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--book) 70%, transparent);
+}
+.book-sigil svg { width: 78%; height: 78%; }
+.book-text { display: flex; flex-direction: column; align-items: flex-start; }
 .book-tab b {
   display: block;
-  font-size: 11.5px;
-  letter-spacing: .05em;
+  font-size: 11px;
+  letter-spacing: .04em;
   white-space: nowrap;
 }
-.book-tab i { font-style: normal; font-size: 10px; opacity: .7; }
+.book-tab i {
+  font-style: normal;
+  font-size: 10px;
+  opacity: .85;
+  color: color-mix(in srgb, var(--book-glow) 80%, white);
+}
 
 .episodes {
   position: relative;
@@ -404,6 +471,79 @@ body {
   line-height: 1.6;
   opacity: .7;
   max-width: 62ch;
+}
+
+/* full episode synopsis — collapsed disclosure */
+
+.synopsis { margin-top: 20px; }
+.synopsis[hidden] { display: none; }
+
+.synopsis > summary {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  width: fit-content;
+  max-width: 100%;
+  padding: 9px 16px 9px 12px;
+  border-radius: 99px;
+  border: 1px solid color-mix(in srgb, var(--glow) 26%, transparent);
+  background: color-mix(in srgb, var(--core) 14%, transparent);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: background 240ms var(--ease), border-color 240ms var(--ease);
+}
+.synopsis > summary::-webkit-details-marker { display: none; }
+.synopsis > summary:hover {
+  background: color-mix(in srgb, var(--core) 26%, transparent);
+  border-color: color-mix(in srgb, var(--glow) 46%, transparent);
+}
+.synopsis > summary:focus-visible { outline: 2px solid var(--glow); outline-offset: 2px; }
+
+.synopsis-chev {
+  width: 0; height: 0;
+  flex: 0 0 auto;
+  border-left: 6px solid var(--glow);
+  border-top: 4.5px solid transparent;
+  border-bottom: 4.5px solid transparent;
+  transition: transform 240ms var(--ease);
+}
+.synopsis[open] .synopsis-chev { transform: rotate(90deg); }
+
+.synopsis-label {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.synopsis-hint {
+  font-size: 12px;
+  opacity: .55;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.synopsis-body {
+  font-family: var(--serif);
+  font-size: clamp(15.5px, 1.15vw, 17px);
+  line-height: 1.75;
+  max-width: 70ch;
+  margin: 18px 0 4px;
+  padding: 2px 0 2px 18px;
+  border-left: 2px solid color-mix(in srgb, var(--glow) 30%, transparent);
+  animation: reveal 340ms var(--ease);
+}
+.synopsis-body p { margin: 0 0 16px; }
+.synopsis-body p:last-child { margin-bottom: 0; }
+
+@keyframes reveal {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 560px) {
+  .synopsis-hint { display: none; }
 }
 
 /* who + bending */

@@ -21,7 +21,7 @@ html = re.sub(
     html,
 )
 
-if 'src="' in html or 'href="styles' in html:
+if re.search(r'<script[^>]+\bsrc=', html) or re.search(r'<link[^>]+stylesheet', html):
     sys.exit("build: something was not inlined")
 
 OUT.parent.mkdir(parents=True, exist_ok=True)

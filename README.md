@@ -4,8 +4,8 @@ An episode-by-episode retelling of *Avatar: The Last Airbender*, switchable by
 character. Pick who you're following, walk the episode list, and the page
 re-themes itself around whatever that person can bend at that point in the story.
 
-**The whole series is written** — all 61 episodes × 7 characters, 427 entries,
-about 55,000 words.
+**The whole series is written** — all 61 episodes × 7 characters, 427 point-of-view
+entries plus a full plot synopsis for every episode. About 70,000 words.
 
 ---
 
@@ -35,6 +35,10 @@ src/
   data/
     characters.js            the 7 characters + their bending timelines + palettes
     episodes.js              episode index (global numbering across all 3 books)
+    synopses-book1.js        full plot summary per episode, character-neutral
+    synopses-book2.js
+    synopses-book3.js
+    portraits.js             original stylised character portraits (inline SVG)
     pov-book1-aang.js        one file per character, so entries stay easy to find
     pov-book1-katara.js
     pov-book1-sokka.js
@@ -58,6 +62,23 @@ src/
 build.py                     inlines src/ into one HTML file
 dist/                        the built single-file page
 ```
+
+---
+
+## The two layers
+
+Each episode page has two kinds of writing, and they do different jobs.
+
+The **synopsis** is what happened — character-neutral, chronological, complete
+including the B-plots. It lives in `window.ATLA.synopsis` keyed by episode id,
+and renders in a collapsed `<details>` under the logline so it never gets in the
+way. Once opened it stays open as you move between episodes and characters, so
+you can read the series straight through as a story if you want to. Roughly
+160–310 words each.
+
+The **point-of-view entry** is what it meant to one person, and assumes you
+already know the plot. That is the layer everything else on the page is built
+around.
 
 ---
 
@@ -104,6 +125,20 @@ Single-element characters get their sigil in all four corners. Aang starts with
 air in all four, picks up water at chapter 9, adds a greyed-out fire at 16, and
 by chapter 20 has three distinct corners. Book Two adds earth; Book Three brings
 fire back properly.
+
+The book tabs are the one thing that ignores the character theme: each is
+coloured by its own book's element (water blue, earth green, fire red) with a
+matching sigil, so they stay a fixed landmark while everything around them
+re-colours.
+
+The background portrait is drawn from `portraits.js` and tinted with the
+character's glow colour. These are **original drawings, not the show's art** —
+head-and-shoulders silhouettes built from each character's identifying features.
+They sit behind the content at low opacity with a stacked drop-shadow halo, so
+they read against the bright warm themes (Aang, Iroh) as well as the dark ones.
+To use your own images instead, add `portraitSrc: '...'` to a character in
+`characters.js`; because the build inlines everything into one file, an external
+image needs to be a `data:` URL to survive it.
 
 Per-character colour overrides live in `PALETTE_OVERRIDES` — that's why Azula's
 fire is blue, Iroh's is gold and Zuko's is crimson.

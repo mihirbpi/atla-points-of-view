@@ -6,9 +6,9 @@
 window.ATLA = window.ATLA || {};
 
 window.ATLA.books = [
-  { id: 1, name: 'Book One', element: 'water', subtitle: 'Water' },
-  { id: 2, name: 'Book Two', element: 'earth', subtitle: 'Earth' },
-  { id: 3, name: 'Book Three', element: 'fire', subtitle: 'Fire' }
+  { id: 1, name: 'Book One', short: 'Book I', element: 'water', subtitle: 'Water' },
+  { id: 2, name: 'Book Two', short: 'Book II', element: 'earth', subtitle: 'Earth' },
+  { id: 3, name: 'Book Three', short: 'Book III', element: 'fire', subtitle: 'Fire' }
 ];
 
 window.ATLA.episodes = [

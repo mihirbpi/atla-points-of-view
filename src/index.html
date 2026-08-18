@@ -19,6 +19,8 @@
   <div class="corner corner-mid"><div class="sigil" data-corner="4"></div></div>
 </div>
 
+<div class="portrait" id="portrait" aria-hidden="true"></div>
+
 <header class="masthead">
   <div class="masthead-inner">
     <div class="brand">
@@ -53,6 +55,15 @@
       </div>
       <h1 class="ep-title" id="epTitle"></h1>
       <p class="ep-logline" id="epLogline"></p>
+
+      <details class="synopsis" id="synopsis">
+        <summary>
+          <span class="synopsis-chev" aria-hidden="true"></span>
+          <span class="synopsis-label">Read the full episode summary</span>
+          <span class="synopsis-hint">the whole plot, start to finish</span>
+        </summary>
+        <div class="synopsis-body" id="synopsisBody"></div>
+      </details>
     </div>
 
     <div class="who">
@@ -85,7 +96,11 @@
 </main>
 
 <script src="data/characters.js"></script>
+<script src="data/portraits.js"></script>
 <script src="data/episodes.js"></script>
+<script src="data/synopses-book1.js"></script>
+<script src="data/synopses-book2.js"></script>
+<script src="data/synopses-book3.js"></script>
 <script src="data/pov-book1-aang.js"></script>
 <script src="data/pov-book1-katara.js"></script>
 <script src="data/pov-book1-sokka.js"></script>
