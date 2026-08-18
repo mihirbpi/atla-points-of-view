@@ -113,9 +113,11 @@ window.ATLA.characters = [
     epithet: 'The Last Airbender',
     house: 'Air Nomads · Southern Air Temple',
     blurb:
-      'Twelve years old, and a hundred and twelve. Every element he learns is ' +
-      'another piece of a duty he never asked for — so watch the corners of ' +
-      'this page fill in as he stops running from it.',
+      'The last airbender, and the Avatar. Twelve years old and a hundred ' +
+      'and twelve. He spends the series learning four elements he never ' +
+      'asked for, and the whole of it arguing — with monks, with his own ' +
+      'past lives, with his friends — about what he is willing to become ' +
+      'in order to end a war.',
     timeline: [
       { el: 'air',   at: 1,  state: 'mastered' },
       { el: 'water', at: 9,  state: 'learning' },
@@ -148,9 +150,11 @@ window.ATLA.characters = [
     epithet: 'The Last Southern Waterbender',
     house: 'Southern Water Tribe',
     blurb:
-      'The only waterbender left in the South, self-taught from nothing. ' +
-      'Book One is the story of her refusing to be told what a waterbender ' +
-      'from her tribe is allowed to become.',
+      'The last waterbender of the Southern Water Tribe, self-taught from ' +
+      'nothing and then trained by masters who did not want to teach her. ' +
+      'Her compassion is not a soft quality but a compulsion: she cannot ' +
+      'walk past cruelty, and she will deceive the people she loves in ' +
+      'order to act on it.',
     timeline: [
       { el: 'water', at: 1,  state: 'learning' },
       { el: 'water', at: 18, state: 'mastered' },
@@ -172,9 +176,10 @@ window.ATLA.characters = [
     epithet: 'The Boomerang Guy',
     house: 'Southern Water Tribe',
     blurb:
-      'No bending. Not one drop. What he has instead is a plan, a boomerang, ' +
-      'and a stubborn refusal to be the least useful person in the room — ' +
-      'which is its own kind of arc.',
+      'No bending. Not one drop. What he has instead is a plan — and ' +
+      'across sixty-one episodes he goes from a boy drilling ' +
+      'six-year-olds on a wall of ice to the strategist who finds the ' +
+      'war\'s one weak point in a library and builds an invasion around it.',
     timeline: [
       { el: 'warrior', at: 1, state: 'mastered' }
     ],
@@ -195,9 +200,11 @@ window.ATLA.characters = [
     epithet: 'The Blind Bandit',
     house: 'Gaoling, Earth Kingdom',
     blurb:
-      'The greatest earthbender alive, and in Book One nobody outside a ' +
-      'wrestling ring knows she exists. Her episodes here are a life running ' +
-      'in parallel to the Avatar\'s, waiting to collide with it.',
+      'Blind from birth, taught earthbending by badgermoles rather than ' +
+      'by any human master, and the best there has ever been at it. She ' +
+      'walked out on a family who loved her and had decided she was ' +
+      'helpless, and she invents an entire new discipline on the strength ' +
+      'of being told she cannot.',
     timeline: [
       { el: 'earth', at: 1,  state: 'mastered' },
       { el: 'metal', at: 39, state: 'mastered' }
@@ -216,9 +223,11 @@ window.ATLA.characters = [
     epithet: 'The Banished Prince',
     house: 'Fire Nation Royal Family',
     blurb:
-      'Chasing the Avatar because catching him is the only door back into a ' +
-      'home that threw him out. The tragedy of Book One is how close he ' +
-      'comes to noticing he doesn\'t want to go through it.',
+      'The banished prince, hunting the Avatar because catching him is ' +
+      'the only door back into a home that threw him out. His arc is the ' +
+      'long, ugly, non-linear business of working out that the thing he ' +
+      'is chasing is not the thing he wants — and it takes most of the ' +
+      'series and one patient uncle.',
     timeline: [
       { el: 'fire',      at: 1,  state: 'mastered' },
       { el: 'lightning', at: 29, state: 'partial' }
@@ -244,9 +253,11 @@ window.ATLA.characters = [
     epithet: 'The Dragon of the West',
     house: 'Fire Nation Royal Family',
     blurb:
-      'The most dangerous man on any ship he is standing on, doing an ' +
-      'extraordinary impression of a retired old man who only wants tea. ' +
-      'Every episode, he is teaching Zuko something Zuko is not ready to hear.',
+      'The Dragon of the West: the most dangerous man in almost any room ' +
+      'he is standing in, doing an extraordinary impression of a retired ' +
+      'old man who only wants tea. He gives up a nation, a rank and a ' +
+      'throne for a nephew who is not his son, and never once frames any ' +
+      'of it as a sacrifice.',
     timeline: [
       { el: 'fire',      at: 1, state: 'mastered' },
       { el: 'lightning', at: 1, state: 'mastered' }
@@ -268,9 +279,10 @@ window.ATLA.characters = [
     epithet: 'The Perfect Daughter',
     house: 'Fire Nation Royal Family',
     blurb:
-      'She does not appear in Book One until its final minute — and that is ' +
-      'the point. While her brother chases a ghost across the world, she is ' +
-      'at home, becoming the reason he can never win.',
+      'The Fire Lord\'s daughter and his favourite — a prodigy with blue ' +
+      'fire and perfect aim, who builds everything she has out of fear ' +
+      'rather than affection, because fear is the more reliable material. ' +
+      'It works flawlessly, right up until it does not.',
     timeline: [
       { el: 'fire',      at: 1,  state: 'mastered' },
       { el: 'lightning', at: 28, state: 'mastered' }
